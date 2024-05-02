@@ -1,0 +1,10 @@
+﻿ku byBase
+{
+    system biao enum "枚举类型表" (
+    string name "名称"
+    , string[] values "枚举值")
+    {
+        { ButtonState "按钮动作或状态", {  update "更新",inquiry"查询", Lock "锁定全部托管控件",init "初始化"} } 
+        { sort"排序方式", { asc "升序",desc"降序" } }
+    }
+}

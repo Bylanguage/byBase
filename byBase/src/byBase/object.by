@@ -1,0 +1,15 @@
+﻿ku byBase
+{
+    system biao object "面向对象类型表" (
+    string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string kind "类型类别"
+    , string inheritance "继承项"
+    , string[] implementations "实现接口")
+    {
+        { buttonLock "设定按钮enable状态，即时锁定或解锁以防止用户误操作，如在Select 时不允许点击新建button等", { client , web }, {  }, class, , {  } }
+        { mergeDialog "设定按钮enable状态，即时锁定或解锁以防止用户误操作，如在Select 时不允许点击新建button等", { client , web }, {  }, class, , {  } }
+        { mergeRelationCtrl"合并相关实体类，主要把合并的grid & tree 选中项统一转成列表方便操作", { client , web }, {  }, class, , {  } } 
+    }
+}

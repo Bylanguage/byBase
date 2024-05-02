@@ -1,0 +1,25 @@
+﻿ku byBaseTest
+{
+    new biao identity.config "身份实例配置表" (
+    string belong "所属身份实例"
+    , string name "名称"
+    , string table "表"
+    , string flow "数据流")
+    {
+        { dic, select, dic,  }
+        { dic, selectPopup, dic, popup }
+        { dic2, select, dic2,  }
+        { dic2, selectPopup, dic2,  }
+        { dic3, select, dic3,  }
+        { dic3, selectPopup, dic3,  }
+        { tree, selectPopup, tree,  }
+        { tree, select, tree,  }
+        { bridge, selectLeft, bridge, selectLeft }
+        { bridge, selectRight, bridge, selectRight }
+        { bridge, insert, bridge,  }
+        { bridge, update, bridge,  }
+        { bridge, delete, bridge,  }
+        { tree2, selectPopup, tree2,  }
+        { tree2, select, tree2,  }
+    }
+}

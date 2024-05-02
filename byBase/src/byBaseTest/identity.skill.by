@@ -1,0 +1,44 @@
+﻿ku byBaseTest
+{
+    system biao identity.skill "身份技能表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数"
+    , string returnType "返回类型"
+    , string body "技能体")
+    {
+        { ClientStartup, main "客户端入口点", { client }, { static }, { string[] args "启动参数"}, void, {
+ 
+        } }
+        { ServerStartup, main "服务端入口点", { server }, { static }, { string[] args "启动参数" }, void, {
+            
+        } }
+        { Home, main "网页主技能，重写此技能以实现自定义的网页初始化逻辑", { web }, {  }, { string queryArgs "网页当前参数字符串，即url中?符后面的内容" }, void, {
+            var tmpManagerDialog = Ku.getKu(nameof (byBase)).createManager("dicManagerTest"); 
+            tmpManagerDialog.show();
+            
+            
+            
+            //var tmpManagertreeManagerTest = System.createManager("byBaseTest","treeManagerTest"); 
+            //tmpManagertreeManagerTest.show(); 
+            
+            //var tmpList = select a.* from :new identity:.dic a;
+            
+            //var tmpBridgeList =  :new identity:.bridge.load(tmpList.rows, MouseButton.left);  
+            //foreach (var item in tmpBridgeList)
+            //{
+            //    foreach (var itemField in item.cells)
+            //    {
+            //        scene(web)System.currentWindow.log("name:"+itemField.field.name);
+            //        scene(web)System.currentWindow.log("summary:"+itemField.field.summary);
+            //        scene(web)System.currentWindow.log("value:"+itemField.value);
+            //        scene(web)System.currentWindow.log("");
+            //    }
+            //    break;
+            //}
+            //Message.alert( tmpBridgeList.count.toString()  ) ;
+        } }
+    }
+}

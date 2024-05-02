@@ -1,0 +1,235 @@
+﻿ku byBase
+{
+    system biao identity.action "身份动作表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] parameters "参数"
+    , string returnType "返回类型"
+    , string body "动作体")
+    {
+        //{ dic, add "字典表插入行", { object.Row~Table f_dicRow "字典表中的行" ,List<Row~Table> f_slaveAdd "从dialog增加" } , object.Result , { 
+        //    if(!this.confirmUserIsLogin())
+        //        return new Result(){info="当前用户还没有登录"};
+                
+        //    var tmpResult = new object.Result(); 
+        //    tmpResult.isOk = true; 
+        //    if(f_dicRow.iID == null || f_dicRow.iID == "") 
+        //    {
+        //        f_dicRow.iID = byCommon.identity.general.getGuid();
+        //    }
+        //    tran
+        //    { 
+        //        var tmpLineCount = insert by f_dicRow;
+        //        if(tmpLineCount != 1 ) 
+        //        {
+        //            interrupt "数据插入失败！"; //出错自动回滚
+        //        }
+        //        insert by f_slaveAdd;       //无值则会自动跳过
+        //    }
+        //    error (string message)
+        //    {
+        //        tmpResult.isOk = false;
+        //        tmpResult.info= message;
+        //    }
+        //    return tmpResult; 
+        //} }
+        //{ dic, remove "字典表删除行",{ object.Row~dic f_dicRow "字典表中的行" , List<Row~Table> f_slaveDelete "从dialog删除" }, object.Result,  {
+        //    if(!this.confirmUserIsLogin())
+        //        return new Result(){info="当前用户还没有登录"};
+                
+        //    var tmpResult = new object.Result();
+        //    tmpResult.isOk = true;
+        //    tran
+        //    {
+        //        int tmpLineCount = delete by f_dicRow;
+        //        if(tmpLineCount != 1) 
+        //        {
+        //            interrupt "删除失败：没有符合条件的行！"; //出错自动回滚
+        //        } 
+        //        delete by f_slaveDelete;    //无值则会自动跳过
+        //    }
+        //    error (string message)
+        //    {
+        //        tmpResult.isOk = false;
+        //        tmpResult.info = message;
+        //    }
+        //    return tmpResult;
+        //} }
+        //{ dic, modify "字典表修改行", { object.Row~dic f_dicrow "新字典表中的行" , List<Row~Table> f_slaveAdd "从dialog增加", List<Row~Table> f_slaveUpdate "从dialog修改" , List<Row~Table> f_slaveDelete "从dialog删除" }, object.Result, {
+        //    if(!this.confirmUserIsLogin())
+        //        return new Result(){info="当前用户还没有登录"};
+                
+        //    var tmpResult = new object.Result();
+        //    tmpResult.isOk = true;
+        //    tran
+        //    {
+        //        int tmpLineCount = update by f_dicrow;
+        //        if( tmpLineCount == 0 ) 
+        //        {
+        //            interrupt "更新失败：返回0行！"; //出错自动回滚
+        //        }
+        //        insert by f_slaveAdd;       //无值则会自动跳过
+        //        update by f_slaveUpdate;    //无值则会自动跳过
+        //        delete by f_slaveDelete;    //无值则会自动跳过
+        //    }
+        //    error (string message)
+        //    {
+        //        tmpResult.isOk = false;
+        //        tmpResult.info = message;  
+        //    }
+        //    return tmpResult;   
+        //} }
+        { Tree, remove "树表删除多行", { object.Row~Tree[] f_treeRows "树表中的行数组", List<Row~Table> f_slaveDelete "从dialog删除" }, object.Result, {
+           	if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+           	var tmpResult = new object.Result();
+			tmpResult.isOk = true;
+			tran
+			{
+			    int tmpLineCount = delete by f_treeRows;
+			    if(tmpLineCount < 1) 
+			    {
+			        interrupt "删除失败：没有符合条件的行！"; //出错自动回滚
+			    }
+			    delete by f_slaveDelete;//无值则会自动跳过
+			}
+			error (string message)
+			{
+			    tmpResult.isOk = false;
+                tmpResult.info = message;
+			}
+			return tmpResult;
+        } }
+        { Tree, modify "树表修改行", { object.Row~Tree f_treeRow "新树表中的行表中的行" ,List<Row~Table> f_slaveAdd "从dialog增加",List<Row~Table> f_slaveUpdate "从dialog修改" ,List<Row~Table> f_slaveDelete "从dialog删除" }, object.Result , {
+            if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+            var tmpResult = new object.Result();
+			tmpResult.isOk = true;
+			tran
+			{
+			    int tmpLineCount = update by f_treeRow;
+			    if( tmpLineCount == 0 ) 
+			    {
+			        interrupt "更新失败：返回0行！"; //出错自动回滚
+			    }
+			    insert by f_slaveAdd;//无值则会自动跳过
+			    update by f_slaveUpdate;//无值则会自动跳过
+			    delete by f_slaveDelete;//无值则会自动跳过
+			}
+			error (string message)
+			{
+			    tmpResult.isOk = false;
+                tmpResult.info = message;  
+			}
+			return tmpResult;
+        } }
+        { Tree, add "树表插入行", { object.Row~Tree f_treeRow "树表中的行",List<Row~Table> f_slaveAdd "从dialog增加" }, object.Result, {
+            if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+            var tmpResult = new object.Result(); 
+            tmpResult.isOk = true; 
+            if(f_treeRow.iID == null || f_treeRow.iID == "") 
+            {
+                f_treeRow.iID = byCommon.identity.general.getGuid();
+            }
+            tran
+            {
+                int tmpLineCount = insert by f_treeRow;
+                if(tmpLineCount != 1 ) 
+                {
+                    interrupt "数据插入失败！"; //出错自动回滚
+                } 
+                insert by f_slaveAdd;//无值则会自动跳过
+            }
+            error (string message)
+            {
+                tmpResult.isOk = false;
+                tmpResult.info= message;
+            }
+            return tmpResult; 
+        } }
+        { bridge, add "中间表插入行", { List<object.Row~bridge> f_bridgeRowList "中间表的行" }, object.Result, {
+			if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+			var tmpResult = new object.Result();
+			tmpResult.isOk = true;
+			foreach (var item in f_bridgeRowList)
+			{
+			    if(item.iID == null || item.iID == "") 
+                {
+                    item.iID = byCommon.identity.general.getGuid();
+                }
+			}
+			int tmpListCount = f_bridgeRowList.count;
+			tran
+			{
+			    var tmpRowCount = insert by f_bridgeRowList; 
+			    if (tmpRowCount != tmpListCount)
+			    {
+			        rollback;
+			        interrupt "对数据库 insert 失败";
+			    }
+			}
+			error (string errorInfo)
+			{
+			    tmpResult.isOk = false;
+				tmpResult.info = errorInfo;
+			}
+			return tmpResult;
+		} }
+        { bridge, change "中间表多行变动", { object.List<object.Row~bridge> f_bridgeAddList "中间表增加行集合", object.List<object.Row~bridge> f_bridgeDeleteList "中间表的删除行集合" }, object.Result,  {
+            if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+            var tmpResult = new object.Result();
+            tmpResult.isOk = true;
+            if(f_bridgeAddList.count > 0 || f_bridgeDeleteList.count > 0)  
+            { 
+                foreach (var item in f_bridgeAddList)
+                {
+                    if(item.iID == null || item.iID == "") 
+                    {
+                        item.iID = byCommon.identity.general.getGuid();
+                    }
+                }
+                tran
+                {
+                    int tmpTotal = insert by f_bridgeAddList ;  
+                    int tmpTotal2 = delete by f_bridgeDeleteList;
+                    if(tmpTotal2 == 0 && tmpTotal ==0) 
+                    {
+                        rollback;
+                        interrupt "没有返回更新成功的行数！";
+                    }
+                }
+                error (string message)
+                {
+                    tmpResult.isOk = false;
+                    tmpResult.info = message;
+                } 
+            } 
+            return tmpResult;
+        }  }
+        { bridge, delete "中间表行删除行", { List<object.Row~bridge> f_bridgeRowList "中间表行" }, object.Result, {
+			if(!this.confirmUserIsLogin())
+                return new Result(){info="当前用户还没有登录"};
+                
+			var tmpResult = new object.Result();
+			tmpResult.isOk = true; 
+			try
+			{
+			    delete by f_bridgeRowList;
+			}
+			catch(Exception e)
+			{
+				tmpResult.isOk = false;
+				tmpResult.info = e.message;
+			}
+			return tmpResult;
+		}  }
+    }
+}

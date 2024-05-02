@@ -1,0 +1,14 @@
+﻿ku byBase
+{
+    system biao identity.event "身份事件表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数")
+    {
+        { dic, CURDChangeEvent "ICURD接口: CURD变动事件", { client,  web }, {  }, { List<Row~Table> f_list "变动列表", Action f_action "说明:curd动作" } }
+        { Tree, CURDChangeEvent "ICURD接口: CURD变动事件", { client, web }, {  }, { List<Row~Table> f_list "变动列表", Action f_action "说明:curd动作" } }
+        { bridge, CURDChangeEvent "ICURD接口: CURD变动事件", { client, web }, {  }, { List<Row~Table> f_list "变动列表", Action f_action "说明:curd动作" } }
+    }
+}

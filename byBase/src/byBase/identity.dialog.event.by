@@ -1,0 +1,13 @@
+﻿ku byBase
+{
+    system biao identity.dialog.event "身份窗体事件表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数")
+    {
+        { dic.manage, addDeleteUpdateEvent "IBy.IMaster接口:增删改查、选中事件，主要与其他合并到当前dialog的从表一起连动", { client, web }, {  }, { Row~Table f_selectRow "选中的行", curdAction f_curdAction "事件说明" } }
+        { Tree.manage, addDeleteUpdateEvent "IBy.IMaster接口:增删改查、选中事件，主要与其他合并到当前dialog的从表一起连动", { client, web }, {  }, { Row~Table f_selectRow "选中的行", curdAction f_curdAction "事件说明" } }
+    }
+}

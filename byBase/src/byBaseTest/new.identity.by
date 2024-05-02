@@ -1,0 +1,17 @@
+﻿ku byBaseTest
+{
+    new biao identity "身份实例表" (
+    string name "名称"
+    , string type "身份类型"
+    , string to "标记项")
+    {
+        { home "web 站点主页", byBaseTest.identity.Home, "index.html" }
+        { dic "字典表身份", byBase.identity.dic, dic }
+        { dic2 "字典表身份", byBase.identity.dic, dic2 }
+        { dic3 "字典表身份", byBase.identity.dic, dic3 }
+        { tree "树形表", byBase.identity.Tree, tree }
+        { bridge "中间表", byBase.identity.bridge, bridge }
+        { extend "扩展表", byBase.identity.extend, extend }
+        { tree2 "树形表", byBase.identity.Tree, tree2 }
+    }
+}

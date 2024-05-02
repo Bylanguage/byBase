@@ -1,0 +1,21 @@
+﻿ku byBaseTest
+{
+    new biao identity.dialog "身份实例窗体表" (
+    string belong "所属身份实例"
+    , string name "名称"
+    , string to "标记项")
+    {
+        { dic, manage, { cEditArea: edit ,cGrid: edit, cQueryArea:  popup} }
+        { dic, popup, { cGrid:popup, cMQueryArea: popup} }
+        { dic2, manage, { cEditArea: edit, cGrid: edit, cQueryArea: edit } }
+        { dic3, manage, {  } }
+        { tree, popup, {    } }
+        { tree, manage, { cEditArea: edit } }
+        { bridge, manage, {  cGridLeft: gridLef , cGridRight: gridRight } }
+        //{ bridge, manageLeft, { mGrid: edit } }
+        //{ bridge, manageRight, { mGrid: edit } }
+        { extend, slave, { cEditArea: edit } }
+        { tree2, popup, {  } }
+        { tree2, manage, { cEditArea: edit } }
+    }
+}

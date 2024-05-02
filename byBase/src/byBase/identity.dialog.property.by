@@ -1,0 +1,65 @@
+﻿ku byBase
+{
+    system biao identity.dialog.property "身份窗体属性表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string type "类型"
+    , OBJECT value "值")
+    {
+        { popupTable.popup , cGrid "表格网格控件", , , object.Grid~Table, new object.Grid(){contextMenu =cContextMenu }~:identity this: } 
+        { popupTable.popup, cContextMenu"cGrid控件的右键菜单", , {  }, ContextMenu, new ContextMenu() }
+        { popupTable.popup , cBtnQuery "检索" , , , object.Button , new object.Button()}
+        { popupTable.popup , cBtnComplete "完成", , , object.Button, new object.Button()}
+        { popupTable.popup , mSelectRowList "完成", , , object.List<object.Row~by.identity.Table>,}
+        { popupTable.popup , cMQueryArea "查询区" , , , object.QueryArea~Table, new object.QueryArea()~:identity this:} 
+        { popupTable.popup, pRowList"记录构造传参，以记录并传递用户选中的值", , {  }, List<Row~Table>,  }  
+        { popupTable.popup, pChildIdentity "记录调用的派生身份, 主要用于调用更全的配置信息" , {  }, {  }, Table,  } 
+        
+        { Tree.popup , cMQueryArea "查询区" , , , object.QueryArea~Tree, new object.QueryArea()~:identity this:} 
+        { Tree.popup , cBtnQuery "检索" , , , object.Button , new object.Button()}
+        { Tree.popup , cTree "表格网格控件", , , object.Tree~Tree ,new object.Tree()~:identity this:}
+        { Tree.popup , cBtnComplete "完成",  , , object.Button, new object.Button()} 
+        { Tree.popup , pRowList"记录构造传参，以记录并传递用户选中的值", , {  }, List<Row~Table>,  } 
+        { Tree.popup , cContextMenu"mTree控件的右键菜单", , {  }, ContextMenu, new ContextMenu() } 
+        { Tree.popup , pChildIdentity "记录调用的派生身份, 主要用于调用更全的配置信息" , {  }, {  }, Table,  } 
+        
+        { dic.manage  , pButtonLock "设定按钮enable状态，即时锁定或解锁以防止用户误操作，如在Select 时不允许点击新建button等", , { private }, buttonLock,  }
+        { dic.manage  , cGrid "字典网格控件",  , ,object.Grid  ,new object.Grid()~:identity this: }
+        { dic.manage  , cBtnQuery "检索", , , object.Button , new object.Button()}
+        { dic.manage  , cBtnAdd "增加",   , , object.Button , new object.Button()}
+        { dic.manage  , cBtnDelete "删除", , , object.Button , new object.Button()}
+        { dic.manage  , cBtnModify "修改", , , object.Button , new object.Button()}
+        { dic.manage  , cBtnSave "保存",  , , object.Button , new object.Button()}
+        { dic.manage  , cBtnCancel "取消", , , object.Button , new object.Button()}
+        { dic.manage  , pAction "窗体动作状态标志位", , ,enum.Action ,enum.Action.select}
+        { dic.manage  , cQueryArea "查询区",  , ,object.QueryArea~dic, new object.QueryArea()~:identity this:}
+        { dic.manage  , cEditArea "编辑区",  , ,object.EditArea~dic, new object.EditArea()~:identity this: }
+        { dic.manage  , pMergeRelationCtrl "相关合并dialog", { client, web }, {  }, mergeRelationCtrl,  }
+        { dic.manage  , pSlaveDialogList "IBy.IMaster接口:其所合并的Dialog列表，主要用于与其所合并的项一起更新，本项主要由合并到当前的dialog的从窗体上更新", { client, web }, {  }, List<ISlave>, new List<ISlave>() }
+        { Tree.manage  , pButtonLock "设定按钮enable状态，即时锁定或解锁以防止用户误操作，如在Select 时不允许点击新建button等", , { private }, buttonLock,  }
+        { Tree.manage  , cTree "树控件",  , ,object.Tree~Tree, new object.Tree()~:identity this: }
+        { Tree.manage  , cEditArea "编辑区",  , ,object.EditArea~Tree, new object.EditArea()~:identity this:}
+        { Tree.manage  , cBtnAdd "增加",  , , object.Button , new object.Button()}
+        { Tree.manage  , cBtnDelete "删除", , , object.Button , new object.Button()}
+        { Tree.manage  , cBtnModify "修改", , , object.Button , new object.Button()}
+        { Tree.manage  , cBtnSave "保存",  , , object.Button , new object.Button()}
+        { Tree.manage  , cBtnCancel "取消", , , object.Button, new object.Button()}
+        { Tree.manage  , mAction "窗体动作状态标志位", , ,enum.Action ,enum.Action.select}
+        { Tree.manage  , pMergeRelationCtrl "相关合并dialog", { client, web }, {  }, mergeRelationCtrl,  }
+        { Tree.manage  , pSlaveDialogList "IBy.IMaster接口:其所合并的Dialog列表，主要用于与其所合并的项一起更新，本项主要由合并到当前的dialog的从窗体上更新", { client, web }, {  }, List<ISlave>, new List<ISlave>() }
+        
+        { bridge.manage , cGridLeft "网格左", , , object.Grid~bridge,new object.Grid(){visible = false}~:identity this:}
+        { bridge.manage , cGridRight "网格右", , , object.Grid~bridge,new object.Grid(){visible = false}~:identity this:}
+        { bridge.manage , cBtnModif "修改", , , object.Button ,  new object.Button()}
+        { bridge.manage , cBtnDelete "删除", , , object.Button ,  new object.Button()}
+        { bridge.manage , pMergeRelationCtrl "相关合并dialog", { client, web }, {  }, mergeRelationCtrl,  }
+        
+        { extend.slave , cEditArea "编辑区",   , ,object.EditArea~extend, new object.EditArea()~:identity this:}
+        { extend.slave , cContextMenu "右键菜单",   , ,object.ContextMenu, new ContextMenu() } 
+        { extend.slave , pMergeRelationCtrl "相关合并dialog", { client, web }, {  }, mergeRelationCtrl,  }
+        { detail.manage  , cGrid "字典网格控件",  , ,object.Grid~detail  ,new object.Grid(){isEnabled = false}~:identity this: } 
+        { detail.manage , pMergeRelationCtrl "相关合并dialog", { client, web }, {  }, mergeRelationCtrl,  }
+    }
+}

@@ -1,0 +1,398 @@
+﻿ku byBase
+{
+    system biao identity.skill "身份技能表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数"
+    , string returnType "返回类型"
+    , string body "技能体")
+    {
+        { relatedEditArea , editAreaReferenceTran "对编辑区中的reference配置项进行弹窗选择，并处理相关显示项", , { static,public }, { by.object.EditArea~Table f_editArea}, void, { 
+            f_editArea.unitEditBegin +=(OBJECT sender, object.EditAreaEventArgs args) //开始编辑 
+            {
+                if( ((object.Field~identity.Field) args.targetUnit.field).:from: is by.identity.Reference) //如果是一个引用 
+                {
+                    
+                    if( args.targetUnit.readonly ||  f_editArea.:from: == ( (object.Field~identity.Reference)args.targetUnit.field).host()  ) return;
+                    var tmpRefTable = args.targetUnit.field.refTable; //获取引用项  
+                    if(tmpRefTable == null) 
+                    {
+                        return;
+                    }
+                    var tmpEques = tmpRefTable as object.Table ~ by.identity.Table; 
+                    if(tmpEques == null) 
+                    {
+                        return;
+                    }
+                    var tmpTest = tmpEques as  identity.IBy;
+                    if(tmpTest == null) 
+                    {
+                        return;
+                    }
+                    var tmpRowList = new List<Row~Table>();//传值
+                    var tmpSelectDialog = tmpTest.getInstanceCURDPopup(tmpRowList,false); 
+                    tmpSelectDialog.showDialog();
+                    if(tmpRowList.count > 0) 
+                    {
+                        f_editArea.setEditingValueRelationally(args.targetIndex,tmpRowList[0]); 
+                    }
+                }
+            };
+		} }
+        { popupTable, popupLoad "装入数据,本skill 可以写在dialog.methord 中的，独立出来是为了代码复用", { client , server, web }, {  }, { QueryData~Table f_QueryData"查询区参数" }, List<Row~popupTable>, {
+            scene(server) 
+            { 
+                var tmpGridRows = new object.List<object.Row ~ popupTable>();  
+                tmpGridRows = (select[config a.selectPopup],a.+  from this a where  a ~== f_QueryData ).rows; 
+                return tmpGridRows;
+            }
+            scene(web,client) 
+            {   
+                if(this.pCacheList != null && f_QueryData.values.length == 0 ) //优先从本地缓存中取数据，以减少访问数据库的次数，进而提高性能
+                    return this.pCacheList;
+                else
+                { 
+                    if( f_QueryData.values.length == 0  ) 
+                        return this.pCacheList =  this.:server popupLoad:( f_QueryData ); //赋值缓存并返回
+                    else
+                        return this.:server popupLoad:( f_QueryData );   //直接返回查询结果 , 因为不全无法缓存
+                }
+            }
+        } } 
+        { dic, addModifDelete"增删改", {  }, {  }, { Row~dic f_row"字典行" , Action f_action"仅支持 insert、update、delete" }, Result , {
+            scene(server)
+            {
+                if( f_action == Action.insert ) 
+                {
+                    tran
+                    {
+                        var tmpRowCount = insert by f_row; 
+                        if (tmpRowCount != 1)
+                        {
+                            rollback;
+                            interrupt "对数据库 insert 失败";
+                        }
+                    }
+                    error (string errorInfo)
+                    {
+                        return new Result(){info = errorInfo};
+                    }
+                }
+                else if( f_action == Action.update ) 
+                {
+                    tran
+                    {
+                        var tmpRowCount = update by f_row; 
+                        if (tmpRowCount != 1)
+                        {
+                            rollback;
+                            interrupt "对数据库 update 失败";
+                        }
+                    }
+                    error (string errorInfo)
+                    {
+                        return new Result(){info = errorInfo};
+                    }
+                }
+                else if( f_action == Action.delete ) 
+                {
+                    tran
+                    {
+                        var tmpRowCount = delete by f_row; 
+                        if (tmpRowCount != 1)
+                        {
+                            rollback;
+                            interrupt "对数据库 delete 失败";
+                        }
+                    }
+                    error (string errorInfo)
+                    {
+                        return new Result(){info = errorInfo};
+                    }
+                }
+                return new Result(){isOk = true};
+            }
+            scene(web,client) 
+                return this.:server addModifDelete:( f_row , f_action );
+        } } 
+        { dic, curdOverride "重写该skill以个性化", { web,client }, {  }, {  Row~dic f_row"字典行" , Action f_action "仅支持 insert、update、delete" }, Result, {
+            return this.addModifDelete( f_row , f_action );
+        } }
+        { dic, load "装入数据,本skill 可以写在dialog.methord 中的，独立出来是为了代码复用", { client , server, web }, {  }, { List<Row~Table> f_selectRowList"合并窗体的传参" , QueryData~Table f_QueryData"查询区参数" }, List<Row~Table>, {
+            scene( server ) 
+            { 
+                var tmpGridRows = new object.List<object.Row ~ dic>();
+                if(f_selectRowList == null || f_selectRowList.count == 0)
+                {
+                    if(f_QueryData != null)
+                        tmpGridRows = (select [config select] ,a.* from this a  where a ~== f_QueryData).rows;
+                    else
+                        tmpGridRows = (select [config select] ,a.* from this a ).rows;
+                }
+                else
+                {
+                    if(f_QueryData != null)
+                        tmpGridRows = (select [config select] ,a.* from this a  where a ~== f_QueryData && a ~== f_selectRowList[0] ).rows;
+                    else
+                        tmpGridRows = (select [config select] ,a.* from this a  where  a ~== f_selectRowList[0] ).rows;
+                }
+                return tmpGridRows; 
+            }
+            scene( web , client ) 
+            {
+                return this.:server load:( f_selectRowList , f_QueryData ); 
+            }
+        } }
+        { dic, getInstanceCURDPopup "ICURD接口: 打开弹窗选择dialog新实例界面", { client, web }, {  }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" }, object.Dialog, { 
+            return new popup(f_selectList,f_isMultiLine); 
+        } }
+        { dic, getInstanceCURDManage "ICURD接口: 获得一个curd管理dialog新实例", { client, web }, {  }, {  }, object.Dialog, {
+            return new manage(); 
+        } }
+        { Tree, popupLoad "装入数据,本skill 可以写在dialog.methord 中的，独立出来是为了代码复用", { client , server, web }, {  }, {  QueryData~Tree f_QueryData"查询区参数"  }, List<Row~Tree>, {
+            scene(server) 
+            { 
+                return ( select[config selectPopup],a.+ from this a where a ~== f_QueryData ).rows ;
+            }
+            scene(web,client) 
+            {
+                return this.:server popupLoad:( f_QueryData );
+            }
+        } }
+        { Tree, refresh "刷新Tree中的指定行数据", {client,web}, , {object.Tree~Tree f_tree "要刷新的tree", object.Row~Tree f_row "要刷新的行"}, void,
+		{
+		    foreach (var rootNode in f_tree.nodes)
+		    {
+		        foreach (var childNode in rootNode.getAllNodes())
+		        {
+		            if(childNode.tag as Row~Tree ~== f_row)
+		            {
+		                var tmpNodeTag = childNode.tag as Row~Tree;
+		                tmpNodeTag ~= f_row;
+		                childNode.text = f_row.iName+" "+f_row.iID;
+		                return;
+		            }
+		        }
+		    }
+		} }
+        { Tree, fill "填充一个行到当前身份项的client中的树控件", {client,web}, {static} , {object.Tree~Tree f_tree "树控件", object.List<object.Row~Tree> f_RowList "树中的行列表"}, void, {
+			f_tree.clear();
+			object.Dictionary<OBJECT,object.TreeNode~Tree> nodeDic = new object.Dictionary<OBJECT,object.TreeNode~Tree>();
+			foreach (var treeRow in f_RowList) //构建树列表项  
+			{
+			    var tmpNO = treeRow.iID;
+				object.TreeNode~Tree tmpForNode = new object.TreeNode()~f_tree; 
+				tmpForNode.text =  treeRow.iName ;
+				tmpForNode.tag = treeRow;
+				nodeDic.add(tmpNO,tmpForNode);
+			}
+			foreach (var treeRow in f_RowList)
+			{
+			    if(!nodeDic.containsKey(treeRow.iParent)) 
+			    {
+			        f_tree.add(nodeDic[treeRow.iID] ); //没找到则说明是根节点
+			    }
+			    else
+			    {
+			        if(treeRow.iParent==treeRow.iID)
+			        {
+			            var tmpTableName = ( (Table)treeRow).:to:.name; 
+			            object.Message.alert("树子项的父项不能为自身，这将陷入无限循环!请修改表:"+tmpTableName+"中标记构件的列INO:"+treeRow.iID+"中的值,其不能与自身的父节点相同!");
+			        }
+			        else
+			        { 
+                        nodeDic[treeRow.iParent].add(nodeDic[treeRow.iID]);  //加入父节点 
+			        }
+			    } 
+			}
+		} }
+        { Tree, addNewNode "加入一个新节点", {client,web}, {static} , {object.Tree~Tree f_tree "树控件",  List<object.Row~Tree> f_RowList "树中的行列表"}, void, {
+			foreach (var item in f_RowList)
+			{
+                Tree.addNewNode( f_tree , item );
+			}
+		} }
+        { Tree, addNewNode "加入一个新节点", {client,web}, {static} , {object.Tree~Tree f_tree "树控件",  object.Row~Tree f_Row "树中的行"}, void, {
+            var tmpNodeList = f_tree.getAllNodes(); 
+            foreach (var item in tmpNodeList)
+            {
+                if(item.tag == null) continue;
+                    
+                var tmpTreeRow = (Row~Tree)item.tag; 
+                object.TreeNode~Tree tmpNode = new object.TreeNode()~f_tree; 
+                tmpNode.text =  f_Row.iName ;
+                tmpNode.tag = f_Row;               
+                if(  f_Row.iParent =="" ||  f_Row.iParent == null )
+                {
+                    f_tree.add(tmpNode); 
+                    return;
+                }
+                else if(tmpTreeRow.iID ==  f_Row.iParent  ) 
+                {
+                    item.add(tmpNode); 
+                    item.expand();
+                    return;
+                }
+            } 
+		} }
+        { Tree, nodeListToRowList "节点列表转成一个行列表", { client, web }, { static }, {Tree f_identity"相关身份" , List<TreeNode~Tree> f_list"节点列表" }, List<Row~Tree>, {
+            var tmpResultList = new List<Row~Tree>();
+            foreach (var item in f_list)
+            {
+                tmpResultList.add(new Row()~f_identity);
+            }
+            return tmpResultList;
+        } }
+        { Tree, getInstanceCURDPopup "ICURD接口: 打开弹窗选择dialog新实例界面", { client, web }, {  }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" }, object.Dialog, {
+            return  new popup(f_selectList,f_isMultiLine); 
+        } }
+        { Tree, getInstanceCURDManage "ICURD接口: 获得一个curd管理dialog新实例", { client, web }, {  }, {  }, object.Dialog, {
+            return new manage(); 
+        } }
+        { Tree , getRelationRows "获得tree中 同表 且主键相关的行 依据当前输入的列表" , { web,client }, { static }, { Tree~Tree f_Tree , List<Row~Tree> f_list"tree相关行" }, List<TreeNode~Tree> , {
+            var tmpResultList = new List<TreeNode~Tree>();
+            var tmpTreeNodeList = new List<Row~Tree>(); 
+            foreach (var item in f_Tree.getAllNodes())
+            {
+                foreach (var itemSelectRow in f_list)
+                {
+                    if( item.tag != null &&  (Row~Tree)item.tag ~== itemSelectRow) 
+                    {
+                        tmpResultList.add(item);
+                        break;
+                    }
+                }
+            }
+            return tmpResultList;
+        } } 
+        { Tree , deleteTreeRelationRows "delete grid.rows中 同表 且主键相关的行 依据当前输入的列表" , {  web,client }, { static }, {  Tree~Tree f_Tree , List<Row~Tree> f_list"tree相关行" } , void , {
+            var tmpResultList = getRelationRows(f_Tree,f_list); 
+            foreach (var item in tmpResultList)
+            {
+                f_Tree.removeChild( item );
+            }
+        } }
+        { Tree, updateTreeRelationRows"update grid.rows中 同表 且主键相关的行 依据当前输入的列表", {  web,client }, { static }, {  Tree~Tree f_Tree , List<Row~Tree> f_list"tree相关行" }, void, {
+            var tmpResultList = getRelationRows(f_Tree,f_list); 
+            foreach ( var item in tmpResultList )
+            {
+                var tmpItemRow = (Row~Tree)item.tag;
+                foreach (var itemNewsRow in f_list)
+                {
+                    if( tmpItemRow ~== itemNewsRow ) 
+                    {
+                        tmpItemRow ~= itemNewsRow;//同表 关系 赋值
+                        item.text = tmpItemRow.iName;
+                        break;
+                    }
+                }
+            }
+        } } 
+        { Tree, setSelectRows "设定tree选中行", {  web,client }, { static }, {  Tree~Tree f_Tree  , List<Row~Tree> f_selectList"tree相关行要选中的行"  }, void, {
+            var tmpResultList = getRelationRows(f_Tree,f_selectList); 
+            f_Tree.selectedNodes = new ReadOnlyList<TreeNode~Tree>(tmpResultList);
+        } }
+        { Tree, confirmUserIsLogin "确认用户是否登录，请重写该技能", { server , web , client }, {  }, {  }, bool "登录后返回true", {
+            return true;
+        } }
+        { catalog, getRow "根据一个表身份，获取当前表所引用的catlog 的row ! ",  ,, {Table f_table "表身份"}, object.Row~catalog, {
+            var tmpList = this.load(null,null);
+		    foreach (var item in tmpList )
+		    {
+		        var tmpCatelogRow =  (Row~catalog)item;
+		        if( tmpCatelogRow.iName == f_table.:to:.name)
+		        {
+		            return tmpCatelogRow;
+		        }
+		    }
+		    return null;
+		} }
+        { bridge, load, {  }, {  }, {  List<Row~Table> f_selectRowList"合并窗体的传参" , MouseButton f_leftRight "left 左 right 右" }, List<Row~bridge> , { 
+            scene(server) 
+            {
+                if(f_leftRight == MouseButton.left)
+                    return ( select  [config selectLeft],a.*  from  this a where a ~in  f_selectRowList ).rows; 
+                else //if(f_leftRight == MouseButton.right)
+                    return ( select [config selectRight],a.*  from  this a where a ~in  f_selectRowList ).rows ;  
+            }
+            scene(web,client)
+            {
+                return f_selectRowList == null ? null :  this.:server load:( f_selectRowList , f_leftRight );
+            }
+        } } 
+        { bridge, addDeleteUpdate, {  }, {  }, { List<Row~bridge> f_addList,List<Row~bridge> f_deleteList }, void, {
+            scene(server) 
+            { 
+                tran
+                {
+                    insert by f_addList;
+                    delete by f_deleteList;
+                }
+                error (string message)
+                {
+                    
+                } 
+            }
+            scene(web,client) 
+            {
+                this.:server addDeleteUpdate:(f_addList,f_deleteList);
+            }
+        } }
+        { bridge, getInstanceCURDPopup "IBy接口:打开弹窗选择dialog新实例界面", { client, web }, {  }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" }, object.Dialog, { 
+            return null; 
+        } }
+        { bridge, getInstanceCURDManage "IBy接口:获得一个curd管理dialog新实例，用于popup中的网格右键弹出管理界面", { client, web }, {  }, {  }, object.Dialog, { 
+            return null;
+        } }
+        { extend , load "取一行数据,根据扩展表的原表身份行", {  }, {  }, { string f_ID "编号" }, Row~extend "返回一个扩展行", {
+            scene(server) 
+            {
+                var tmpList =  (select a.* from this a where a.iID == f_ID).rows; 
+                if(tmpList.count > 0) 
+                    return tmpList[0];
+                else
+                    return null;
+            }
+            scene(web,client) 
+            {
+                return this.:server load:(f_ID);
+            }
+        } }
+        { extend , addUpdateDelete "数据动作", {  }, {  }, { Row~extend f_row "扩展表身份行",Action f_action"仅支持 insert 插入, delete 删除, update 更新" }, int"返回影响行数" , {
+            scene(server) 
+            {
+                int tmpResultValue =0;
+                switch(f_action) 
+                {
+                    case Action.insert:
+                        tmpResultValue = insert by  f_row;
+                        break;
+                    case Action.update:
+                        tmpResultValue = update by  f_row;
+                        break;
+                    case Action.delete:
+                        tmpResultValue = delete by  f_row;
+                        break;
+                }
+                return tmpResultValue;
+            }
+            scene( web , client ) 
+                return    this.:server addUpdateDelete:( f_row , f_action );
+        } }
+        { detail, load "取一行数据,根据扩展表的原表身份行", {  }, {  }, { Row~Table f_row "关系行，即扩展的原表身份行" }, List<Row~detail> , {
+            scene(server) 
+            {
+                return (select a.* from this a where a ~== f_row).rows;
+            }
+            scene(web,client) 
+            {
+                return this.:server load:(f_row);
+            }
+        } }
+        { TableSafe, confirmUserIsLogin "确认用户是否登录，如有安全需求则在子身份中重写该skill", {  }, {  }, {  }, bool "登录返回true" , {
+            return true;
+        } }
+    }
+}

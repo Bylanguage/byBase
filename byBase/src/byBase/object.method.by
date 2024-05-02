@@ -1,0 +1,206 @@
+﻿ku byBase
+{
+    system biao object.method "面向对象方法表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数"
+    , string returnType "返回类型"
+    , string body "方法体")
+    {
+        { buttonLock, buttonLock, , {  }, { Control[] f_inquiry"查询后允许的enable的按钮", Control[] f_AddUpdate"更新增加允许enable的button列表" , Control[] f_Init"初始设定允许enable的button列表" }, , {
+            this.pInquiry.addRange(f_inquiry);
+            this.pAddUpdate.addRange(f_AddUpdate);
+            this.pInit.addRange(f_Init);
+            this.appendCache(this.pInquiry);
+            this.appendCache(this.pAddUpdate);
+            this.appendCache(this.pInit);
+        } }
+        { buttonLock, appendCache, {  }, { private }, { List<Control> f_list "要加入的列表" }, void, {
+            foreach (var item in f_list)
+            {
+                if(!this.pCacheList.contains(item)) 
+                {
+                    this.pCacheList.add(item);
+                }
+            }
+        } }
+        { buttonLock, setButtonState"设定按钮状态", {  }, {  }, { enum.ButtonState f_ButtonState "按钮状态" }, void, {
+            switch(f_ButtonState) 
+            {
+                case ButtonState.init:
+                this.setState(this.pInit);
+                break;
+                case ButtonState.inquiry:
+                this.setState(this.pInquiry);
+                break;
+                case ButtonState.update:
+                this.setState(this.pAddUpdate);
+                break;
+                case ButtonState.Lock:
+                this.setState(new List<Control>());
+                break;
+            }
+        } } 
+        { buttonLock, setState"设定状态", {  }, { private }, {  List<Control> f_enablelist "要设定有效的button列表"  }, void, {
+            foreach (var item in this.pCacheList)
+            {
+                if(!f_enablelist.contains(item)) 
+                {
+                    item.isEnabled = false;
+                }
+                else
+                {
+                    item.isEnabled = true;
+                }
+            }
+        } }         
+        { mergeDialog, getAddUpdateDeleteList "获取合并 ISlave 中的curd", ,{static},{List<IBy.ISlave> f_ISlaveList ,List<Row~by.identity.Table> f_addList "放置增加行",List<Row~by.identity.Table> f_updateList "放置更新行",List<Row~by.identity.Table> f_deleteList"放置删除行" }, void , {
+            foreach (var item in f_ISlaveList)
+            {
+                var tmpDic = item.getAddDeleteUpdate();
+                foreach (var itemCurd in tmpDic)
+                {
+                    switch(itemCurd.key) 
+                    {
+                        case Action.insert:
+                            f_addList.addRange(itemCurd.value);
+                            break;
+                        case Action.update:
+                            f_updateList.addRange( itemCurd.value );
+                            break;
+                        case Action.delete:
+                            f_deleteList.addRange( itemCurd.value );
+                            break;
+                    }
+                }
+            }
+        } }  
+        { mergeDialog, verifySlaveDialog "验证从dialog是否合法", {  }, { static }, { IBy.IMaster f_IMaster }, bool, {
+            foreach (var item in f_IMaster.pSlaveDialogList)
+            {
+                if(!item.verifyAddDeleteUpdate())
+                    return false;
+            } 
+            return true;
+        } }
+        { mergeDialog, mergeDialog "处理合并dialog窗体", , {  }, { Dialog f_currentDialog "当前会话窗体" ,by.identity.Table f_table "当前表身份" }, , {
+            this.pMergeDialog =  object.Manager.getMergeDialog(f_currentDialog); 
+            if(this.pMergeDialog != null) 
+            {
+                var tmpIMaster = this.pMergeDialog as byInterface.identity.IBy.IMaster;
+                if(tmpIMaster != null && f_currentDialog is byInterface.identity.IBy.ISlave) //在主dialog中记录实现iSlave接口的从会话dialog窗体，主要实现一个事物保存数据
+                {
+                    tmpIMaster.pSlaveDialogList.add((byInterface.identity.IBy.ISlave)f_currentDialog);
+                }
+                var tmpTargetList = new List<Control~by.identity.Table>();
+                this.tranControl( this.pMergeDialog.children , tmpTargetList ); 
+                var tmpCurrentList  = new List<Control~by.identity.Table>(); 
+                this.tranControl( f_currentDialog.children , tmpCurrentList );  
+                foreach (var item in tmpCurrentList)
+                {
+                    var itemCurId = item as Control~by.identity.Table;
+                    foreach (var itemMerge in tmpTargetList)
+                    {
+                        var itemMergeId = itemMerge as Control~by.identity.Table;   
+                        if( itemCurId.:from:.isReference(itemMergeId.:from:) ) //看看这两个身份是不是存在关系 
+                        {
+                            var tmpMergeRelation = new mergeRelationCtrl(item , itemMergeId);
+                            this.pCtrList.add( tmpMergeRelation );
+                            break;
+                        }
+                    }
+                } 
+                if(tmpCurrentList.count == 0 ) 
+                { 
+                    foreach (var itemMerge in tmpTargetList)
+                    {
+                        if( itemMerge.:from:.isReference(f_table) ) //看看这两个身份是不是存在关系 
+                        {
+                            var tmpMergeRelation = new mergeRelationCtrl( f_table , itemMerge);
+                            this.pCtrList.add( tmpMergeRelation );
+                            break;
+                        }
+                    } 
+                } 
+            }
+        } } 
+        { mergeDialog, tranControl "递归寻找会话窗体中的grid & tree 控件", {  }, { private }, { ReadOnlyList<Control> f_rdList,List<Control~by.identity.Table> f_resultList"存处理结果列表" }, void, {
+            foreach (var item in f_rdList )
+            {
+                if(item is Grid~by.identity.Table  || item is Tree~by.identity.Table) 
+                {
+                    f_resultList.add((Control~by.identity.Table)item);
+                }
+                else if(item is Panel)  
+                {
+                    this.tranControl(((Panel)item).children , f_resultList);
+                }
+                else if(item is TableLayoutPanel)
+                {
+                    this.tranControl(((TableLayoutPanel)item).children , f_resultList);
+                }
+            }
+        } } 
+        { mergeDialog, getMergeRelationCtrl "获取合并窗体相关控件", {  }, {  }, { by.identity.Table f_ctrlId "双类型控件grid||tree" }, mergeRelationCtrl "找不到返回NULL", {
+            foreach (var item in this.pCtrList)
+            {
+                if(item.pCurrentCtr == f_ctrlId) 
+                {
+                    return item;
+                }
+            } 
+            return null;
+        } }
+        { mergeRelationCtrl, mergeRelationCtrl, , {  }, { by.identity.Table f_currentCtr"当前grid||tree控件" ,Control~by.identity.Table f_mergeCtr"合并窗体的grid||tree控件"  }, , {
+            this.pCurrentCtr = f_currentCtr;
+            this.pMergeCtr = f_mergeCtr; 
+            if(this.pMergeCtr is Grid) 
+            {
+                var tmpGrid = (Grid~by.identity.Table) this.pMergeCtr; 
+                tmpGrid.selectionChanged +=(OBJECT sender, EventArgs args)
+                {
+                    if( this.selectChangeEvent != null ) 
+                    {
+                        this.selectChangeEvent( tmpGrid.selectedRows.toList() );
+                    }
+                };
+            }
+            else if(this.pMergeCtr is Tree)
+            {
+                var tmpTree = (Tree~by.identity.Table) this.pMergeCtr; 
+                tmpTree.selectionChanged +=(OBJECT sender, TreeNodeEventArgs treeNodeArgs)
+                {
+                    if( this.selectChangeEvent != null ) 
+                    {
+                        var tmpSelectRow = new List<Row~by.identity.Table>();
+                        foreach (var item in tmpTree.selectedNodes)
+                        {
+                            tmpSelectRow.add((Row~by.identity.Table)item.tag);
+                        }
+                       // tmpSelectRow.add((Row~by.identity.Table)treeNodeArgs.node.tag);
+                        this.selectChangeEvent(  tmpSelectRow );
+                    }
+                };
+            }
+        } } 
+        { mergeRelationCtrl, getMergeSelectRowList "获得合并相关的grid || tree 选中行", {  }, {  }, { }, List<Row~by.identity.Table>, {
+            var tmpResultList = new List<Row~by.identity.Table>();
+            if(this.pMergeCtr is Grid) 
+            {
+                return  ( (Grid~by.identity.Table) this.pMergeCtr).selectedRows.toList(); 
+            } 
+            else if(this.pMergeCtr is Tree ) 
+            {
+                var tmpNodes = ( ( Tree~by.identity.Table ) this.pMergeCtr).selectedNodes; 
+                foreach (var item in tmpNodes)
+                {
+                    tmpResultList.add((Row~by.identity.Table)item.tag);
+                } 
+            } 
+            return tmpResultList;
+        } } 
+
+    }
+}

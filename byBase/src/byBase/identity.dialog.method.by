@@ -1,0 +1,982 @@
+﻿ku byBase
+{
+    system biao identity.dialog.method "身份窗体方法表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string[] parameters "参数"
+    , string returnType "返回类型"
+    , string body "方法体")
+    {
+        { popupTable.popup, popup, , {  }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" }, , {  
+            this.init( f_selectList , f_isMultiLine , null );
+        } } 
+        { popupTable.popup, popup, , {  }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" , Table f_table "派生身份"  }, , {  
+            this.init( f_selectList , f_isMultiLine , f_table );
+        } } 
+        { popupTable.popup, init "初始化", {  }, { private }, { List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" ,Table f_table "派生身份" }, void, {
+            this.pChildIdentity =  f_table == null ? :identity this: : f_table; //记录派生身份
+            var tmpMenuItem = new MenuItem(); 
+            tmpMenuItem.text ="添加数据"; 
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                var tmpCurdDialog = :identity this: as IBy; 
+                if(tmpCurdDialog == null) return;
+                
+                tmpCurdDialog.CURDChangeEvent +=tmpCurdDialog_CURDChangeEvent;
+                var tmpManage = tmpCurdDialog.getInstanceCURDManage(); 
+                tmpManage.showDialog(); 
+                tmpCurdDialog.CURDChangeEvent -=tmpCurdDialog_CURDChangeEvent; //关闭前注消事件
+            };
+            this.cContextMenu.add(tmpMenuItem); //加入右键菜单
+            var tmpMenuRefresh = new MenuItem(); 
+            tmpMenuRefresh.text ="刷新"; 
+            tmpMenuRefresh.click +=(OBJECT sender, EventArgs args)
+            {
+                this.load();
+            };
+            this.cContextMenu.add(tmpMenuRefresh); //加入右键菜单
+            this.cGrid.contextMenu =  this.cContextMenu;
+            this.cGrid.isMultiLine = f_isMultiLine; 
+            this.pRowList = f_selectList; //暂存
+            this.cBtnComplete.click +=btnComplete_click;
+            this.cBtnQuery.click+=(OBJECT sender, EventArgs args)
+            {
+                this.load(); 
+            };
+            this.load(); 
+            if(:identity this:.:to:.summary == null || :identity this:.:to:.summary == ""  ) 
+                this.text = :identity this:.:to:.name;  
+            else
+                this.text = :identity this:.:to:.summary;  
+
+            this.cGrid.cellDoubleClick+=mGrid_cellDoubleClick;
+        } }
+        { popupTable.popup, tmpCurdDialog_CURDChangeEvent "弹窗选择多行或一行, ICURD接口: CURD变动事件", { client, web }, { private }, { List<Row~Table> f_list "变动列表", Action f_action "说明:curd动作" }, void, {
+            switch(f_action) 
+            {
+                case Action.select:
+                    this.cGrid.clear();
+                    this.cGrid.addRange(f_list);
+                    break;
+                case Action.delete:
+                    byCommon.identity.relatedGrid.deleteGridRelationRows( this.cGrid , f_list );
+                    break;
+                case Action.update:
+                    byCommon.identity.relatedGrid.updateGridRelationRows( this.cGrid , f_list );
+                    break;
+                case Action.insert:
+                    this.cGrid.addRange(f_list);
+                    break;
+            }
+        } }
+        { popupTable.popup, mGrid_cellDoubleClick "弹窗选择多行或一行, 单元格双击事件", , { private }, { OBJECT sender, object.GridCellEventArgs args }, void, {
+            this.btnComplete_click(null,null);
+        } }
+        { popupTable.popup, btnComplete_click "弹窗选择多行或一行, 按钮点击事件", , { private }, { OBJECT sender, OBJECT args }, void, { 
+            this.pRowList.clear();
+            this.pRowList.addRange( this.cGrid.selectedRows.toArray() );
+            this.close();
+        } }
+        { popupTable.popup, load "基dialog查询", , , {} ,void, {
+			this.cGrid.clear();
+			var tmpWaiting =byCommon.identity.relatedDialog.Loading(); //开启 waiting...
+            var tmpGridRows = :identity this:.popupLoad( this.cMQueryArea.data ); 
+			this.cGrid.addRange(tmpGridRows); 
+			byCommon.identity.relatedGrid.setSelectRows( this.cGrid , this.pRowList );	
+			tmpWaiting.close();
+		} }
+        { popupTable.popup, actionInquiry "查询",, , {} ,void,	{
+			this.cBtnQuery.isEnabled = false;
+			this.cBtnComplete.isEnabled = false;
+			this.load();
+			this.cBtnQuery.isEnabled = true;
+			this.cBtnComplete.isEnabled = true;
+		} }
+        
+        { Tree.popup, popup "树选择弹窗界面", , ,{ List<Row~Table> f_selectList "要默认选中的列表，用户选择行后会放入该列表中", bool f_isMultiLine "多行选中模式,true:多行,false:单行" } , ,{
+			var tmpMenuItem = new MenuItem(); 
+            tmpMenuItem.text ="添加数据"; 
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                var tmpCurdDialog = :identity this: as IBy; 
+                if(tmpCurdDialog == null) return;
+                
+                tmpCurdDialog.CURDChangeEvent +=tmpCurdDialog_CURDChangeEvent;
+                var tmpManage = tmpCurdDialog.getInstanceCURDManage(); 
+                tmpManage.showDialog(); 
+                tmpCurdDialog.CURDChangeEvent -=tmpCurdDialog_CURDChangeEvent;
+                
+            };
+            this.cContextMenu.add(tmpMenuItem); //加入右键菜单 
+            var tmpMenuRefresh = new MenuItem(); 
+            tmpMenuRefresh.text ="刷新"; 
+            tmpMenuRefresh.click +=(OBJECT sender, EventArgs args)
+            {
+                this.load();
+            };
+            this.cContextMenu.add(tmpMenuRefresh); //加入右键菜单
+            this.cTree.contextMenu =  this.cContextMenu;
+            this.cTree.nodeDoubleClick +=(OBJECT sender, TreeNodeEventArgs treeNodeArgs)
+            {
+                this.cBtnComplete_click(null,null); //双击自动选中
+            };
+            
+			this.cTree.isMultiLine = f_isMultiLine; 
+            this.pRowList = f_selectList; //暂存
+			this.cBtnComplete.click  += cBtnComplete_click;
+			this.text = :identity this:.:to:.name;
+			this.load();
+			this.cBtnQuery.click+=(OBJECT sender, EventArgs args)
+            {
+                this.load(); 
+            };
+			setSelectRows(this.cTree,(List<Row~Tree>)this.pRowList);
+		} }
+        { Tree.popup, cBtnComplete_click "弹窗选择多行或一行，按钮点击事件", { client, web }, { private }, { OBJECT sender, EventArgs args }, void, {
+            this.pRowList.clear();
+            foreach (var item in this.cTree.selectedNodes)
+            {
+                this.pRowList.add(( Row~Tree )item.tag ); 
+            }
+            this.close();
+        } }
+        { Tree.popup, tmpCurdDialog_CURDChangeEvent "弹窗选择多行或一行, ICURD接口: CURD变动事件", { client, web }, { private }, { List<Row~Table> f_list "变动列表", Action f_action "说明:curd动作" }, void, {
+            switch(f_action) 
+            {
+                case Action.select:
+                    this.cTree.clear();
+                    Tree.fill(this.cTree , (List<Row~Tree>)f_list );
+                    break;
+                case Action.delete:
+                    deleteTreeRelationRows( this.cTree , (List<Row~Tree>)f_list );
+                    break;
+                case Action.update:
+                    updateTreeRelationRows( this.cTree ,(List<Row~Tree>) f_list );
+                    break;
+                case Action.insert:
+                    Tree.addNewNode( this.cTree , (List<Row~Tree>)f_list );
+                    break;
+            }
+        } }
+        { Tree.popup, load "查询", , , {} ,void,{
+		    var tmpSelectResult =  :identity this:.popupLoad(this.cMQueryArea.data) ; 
+			Tree.fill( cTree , tmpSelectResult );  //调用身份技能
+		} } 
+
+        { dic.manage, manage , , ,{} ,,{ 
+            if(!:identity this:.confirmUserIsLogin())
+                return;
+                
+            var tmpUpdateAllow = new Control[]{this.cBtnSave,this.cBtnCancel,this.cEditArea};
+            var tmpInitAllow = new Control[]{this.cBtnAdd,this.cBtnDelete,this.cBtnModify,this.cBtnQuery,this.cGrid,this.cQueryArea};
+            this.pButtonLock = new buttonLock( new Control[]{},tmpUpdateAllow,tmpInitAllow);
+            this.cBtnQuery.click += actionInquiry;
+            this.cBtnAdd.click += actionAddBegin;
+            this.cBtnDelete.click += actionDelete;
+            this.cBtnModify.click += actionModifyBegin;
+            this.cBtnSave.click += actionSave; 
+            this.cBtnCancel.click+=btnCancel_click; 
+            this.cGrid.selectionChanged+=mGrid_selectionChanged; 
+            this.pButtonLock.setButtonState(ButtonState.init); 
+            relatedEditArea.editAreaReferenceTran(this.cEditArea); 
+            if(object.Manager.getMergeDialog(this) != null ) 
+            { 
+                this.pMergeRelationCtrl = new mergeDialog(this, :identity this: ).getMergeRelationCtrl((Grid~Table)this.cGrid);
+                if(pMergeRelationCtrl != null) 
+                { 
+                    this.pMergeRelationCtrl.selectChangeEvent +=(List<Row~Table> f_selectList    )
+                    {
+                        this.load(f_selectList);
+                    }; 
+                }
+            }
+            else
+            {
+                this.load(null);
+            }
+        } }
+        { dic.manage, btnCancel_click "字典表, 按钮点击事件", , { private }, {OBJECT f_sender,OBJECT f_e} , void,{
+            this.pButtonLock.setButtonState(ButtonState.init);
+        } }
+        { dic.manage, mGrid_selectionChanged "字典表, 行选中发生改变事件", , { private }, {OBJECT f_sender,OBJECT f_e}, void,{
+            if(this.cGrid.selectedRows.count == 1)
+            {
+                this.cEditArea.setEditingData(this.cGrid.selectedRows[0]);
+            }
+        } }
+        { dic.manage, load, , {  }, { List<Row~Table> f_selectRowList"合并窗体的传参" }, void, {
+            this.cGrid.clear();
+            var tmpWaiting = byCommon.identity.relatedDialog.Loading();
+            if(f_selectRowList == null && this.pMergeRelationCtrl != null && this.pMergeRelationCtrl.getMergeSelectRowList().count > 0)
+            {
+                f_selectRowList = this.pMergeRelationCtrl.getMergeSelectRowList(); 
+            } 
+            var tmpGridRows =  :identity this:.load( f_selectRowList , this.cQueryArea.data  );
+            ((Grid~Table)this.cGrid).addRange( tmpGridRows ); 
+            if(:identity this:.CURDChangeEvent != null) 
+            {
+                :identity this:.CURDChangeEvent( tmpGridRows , Action.select );
+            }
+            tmpWaiting.close();//close loading ...
+        } }
+        { dic.manage, actionInquiry "查询", , , {OBJECT f_sender,OBJECT f_e},void,{
+            this.pButtonLock.setButtonState(ButtonState.Lock);
+            this.load(  null );
+            this.pButtonLock.setButtonState(ButtonState.init);
+        } }
+        { dic.manage, actionAddBegin "字典管理-增加开始", , ,{OBJECT f_sender,OBJECT f_e} ,void,{
+            this.pAction = Action.insert;  //修改标志位
+            this.pButtonLock.setButtonState(ButtonState.update);
+            var tmpRowSingle = ((Grid~Table)this.cGrid).newRow(); 
+            foreach (var item in tmpRowSingle.cells)
+            {
+                if(item.value is DateTime) 
+                    item.value = DateTime.getNow();
+            }
+            if(this.pMergeRelationCtrl != null && this.pMergeRelationCtrl.getMergeSelectRowList().count > 0)
+            {
+                tmpRowSingle ~= this.pMergeRelationCtrl.getMergeSelectRowList()[0]; 
+            }
+            this.cEditArea.editAction = Action.insert; 
+            this.cEditArea.setEditingData(tmpRowSingle);
+            if(this.addDeleteUpdateEvent!= null) 
+                this.addDeleteUpdateEvent( tmpRowSingle , curdAction.addBegin );//处理合并代码
+        } }
+        { dic.manage, actionAddEnd "字典管理-增加结束", , ,{} ,void,{
+            var tmpRow = ((EditArea~dic)this.cEditArea).getEditingData();
+            var tmpVerifyResult = this.cEditArea.verify(); 
+            //tmpRow.iID = byCommon.identity.general.getGuid();
+            if(!tmpVerifyResult.isOk)
+            {
+                object.Message.alert("编辑区填写的内容不合法:"+tmpVerifyResult.info);
+                return;
+            }
+            if(!mergeDialog.verifySlaveDialog((IBy.IMaster)this))
+                return; //从dialog验证不合法
+            
+            var tmpValue = :identity this:.curdOverride( tmpRow, Action.insert );
+            byCommon.identity.relatedGrid.refresh( (Grid~Table)this.cGrid , tmpRow ); //刷新本地的 mGrid 控件中的同行数据
+            if( tmpValue.isOk ) //说明执行成功
+            {
+                this.pButtonLock.setButtonState(ButtonState.init);
+                this.cGrid.add(tmpRow); 
+                if(:identity this:.CURDChangeEvent != null) 
+                {
+                    var tmpList = new List<Row~dic>();
+                    tmpList.add(tmpRow);
+                    :identity this:.CURDChangeEvent(tmpList, Action.insert);
+                } 
+                if(this.addDeleteUpdateEvent!= null)  //处理合并代码
+                { 
+                    this.addDeleteUpdateEvent( tmpRow , curdAction.addSave ); 
+                }
+            }
+            else
+            {
+                object.Message.alert("增加数据失败！"); //甩出 出错内容
+            }
+        } }
+        { dic.manage, actionModifyBegin "修改开始" , , ,{OBJECT f_sender,OBJECT f_e} ,void,   {
+            this.pAction = Action.update;  //修改标志位
+            this.pButtonLock.setButtonState(ButtonState.update);
+            this.cEditArea.init();//初始化，或清空内容 
+            this.cEditArea.editAction = Action.update;
+            var tmpSelectedRows = ((Grid~dic)this.cGrid).selectedRows;
+            if(tmpSelectedRows.count < 1)
+            {
+                object.Message.alert("请选择一行，再尝试该操作！");
+                this.pButtonLock.setButtonState(ButtonState.init);
+            }
+            else if(tmpSelectedRows.count == 1)
+            {
+                this.cEditArea.setEditingData(tmpSelectedRows[0]);
+                if(this.addDeleteUpdateEvent!= null)  //处理合并代码
+                { 
+                    this.addDeleteUpdateEvent( tmpSelectedRows[0] , curdAction.modifBegin ); 
+                }
+            }
+            else
+            {
+                object.Message.alert("不能多选，一次仅能选择一行编辑！");
+                this.pButtonLock.setButtonState(ButtonState.init);
+            }
+        } }
+        { dic.manage, actionModifyEnd "修改结束", , , {} ,void,{
+            var tmpEditRow = ((EditArea~dic)this.cEditArea).getEditingData();
+            var tmpVerifyResult = tmpEditRow.verify();
+            if(tmpEditRow == null || !tmpVerifyResult.isOk)
+            {
+                object.Message.alert("编辑区有错误:"+tmpVerifyResult.info);
+                return;
+            }
+            if(!mergeDialog.verifySlaveDialog((IBy.IMaster)this))
+                return; //从dialog验证不合法
+            
+            var tmpResult = :identity this:.curdOverride(tmpEditRow, Action.update );
+            if( tmpResult.isOk == true)
+            {
+                if(this.addDeleteUpdateEvent!= null) 
+                { 
+                    this.addDeleteUpdateEvent( tmpEditRow , curdAction.modifSave );  //处理合并代码
+                }
+                byCommon.identity.relatedGrid.refresh(((Grid~dic)this.cGrid),tmpEditRow);//说明执行成功  刷新本地的 mGrid 控件中的同行数据 
+                if(:identity this:.CURDChangeEvent != null) 
+                {
+                    var tmpList = new List<Row~dic>();
+                    tmpList.add(tmpEditRow);
+                    :identity this:.CURDChangeEvent(tmpList, Action.update);
+                }
+            }
+            else
+            {
+                object.Message.alert(tmpResult.info); //甩出 出错内容
+                return;
+            }
+            this.pButtonLock.setButtonState(ButtonState.init);
+        } }
+        { dic.manage, actionDelete "删除", , ,{OBJECT f_sender,OBJECT f_e} ,void,{
+            this.pButtonLock.setButtonState(ButtonState.Lock);
+            var tmpSelectedRows = ((Grid~dic)this.cGrid).selectedRows;
+            if(tmpSelectedRows.count < 1)
+            {
+                object.Message.alert("请选择一行，再尝试该操作！");
+            }
+            else if(tmpSelectedRows.count == 1)
+            {
+                if(object.Message.confirm("确认要删除？") )
+                {
+                    var tmpMergeDeleteList = new List<Row~Table>();
+                    mergeDialog.getAddUpdateDeleteList( this.pSlaveDialogList, null,null,tmpMergeDeleteList); 
+                    Result tmpResult =  :identity this:.curdOverride(tmpSelectedRows[0], Action.delete );
+                    if(tmpResult.isOk != true)
+                    {
+                        Message.alert(tmpResult.info); //甩出 出错内容
+                        if(:identity this:.CURDChangeEvent != null) 
+                        {
+                            :identity this:.CURDChangeEvent(tmpSelectedRows.toList(), Action.delete);
+                        }
+                    }
+                    else
+                    {
+                        this.cGrid.removeChild( tmpSelectedRows[0] ); 
+                        if(this.addDeleteUpdateEvent!= null) //处理合并代码
+                        { 
+                            this.addDeleteUpdateEvent( tmpSelectedRows[0] , curdAction.delete ); 
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Message.alert("不能多选，一次仅能选择一行编辑！");
+            }
+            this.pButtonLock.setButtonState(ButtonState.init);
+        } }
+        { dic.manage, actionSave "完成后保存", , ,{OBJECT f_sender,OBJECT f_e} ,void,{
+            switch(this.pAction)
+            {
+                case by.enum.Action.update:
+                    this.actionModifyEnd();
+                    break;
+                case by.enum.Action.insert:
+                    this.actionAddEnd();
+                    break;
+            }
+        } }
+        { dic.manage, getSelectRows, , , {  }, List<object.Row~Table>, {  
+            var tmpResultValue = new List<object.Row~Table>();
+            if(this.cEditArea.editAction == Action.insert) 
+            {
+                tmpResultValue.add(((EditArea~dic)this.cEditArea).getEditingData());
+            }
+            else
+            {
+                tmpResultValue.addRange(this.cGrid.selectedRows.toArray());
+            }
+            return tmpResultValue; 
+        } }
+        
+        { Tree.manage, manage, , ,{} ,   ,{
+            
+            var tmpUpdateAllow = new Control[]{this.cBtnSave,this.cBtnCancel,this.cEditArea};
+            var tmpInitAllow = new Control[]{this.cBtnAdd,this.cBtnDelete,this.cBtnModify};
+            this.pButtonLock = new buttonLock( new Control[]{},tmpUpdateAllow,tmpInitAllow); 
+            this.pButtonLock.setButtonState(ButtonState.init);
+			this.cBtnAdd.click += actionAddBegin; //增加
+			this.cBtnDelete.click += actionDelete; //删除
+			this.cBtnModify.click += actionModifyBegin;//修改
+			this.cBtnSave.click += actionSave;//修改或增加完成
+			this.cBtnCancel.click +=btnCancel_click;
+			this.cTree.selectionChanged +=cTree_selectionChanged;
+            relatedEditArea.editAreaReferenceTran(this.cEditArea); 
+            if(object.Manager.getMergeDialog(this) != null ) 
+            { 
+                this.pMergeRelationCtrl = new mergeDialog(this , :identity this:  ).getMergeRelationCtrl(this.cTree);
+                if(pMergeRelationCtrl != null) 
+                { 
+                    this.pMergeRelationCtrl.selectChangeEvent +=(List<Row~Table> f_selectList   )
+                    {
+                        this.load(f_selectList);
+                    };
+                }
+            }
+            else
+            {
+                this.load(null);
+            } 
+		} }
+        { Tree.manage,  cTree_selectionChanged "树管理行选中事件", , , {OBJECT f_sender,OBJECT f_e} , void,{
+            if(this.cTree.selectedNode != null && this.cTree.selectedNode.tag != null) 
+            { 
+                this.cEditArea.setEditingData(this.cTree.selectedNode.tag as Row);
+                var tmpRowList = Tree.nodeListToRowList(:identity this:,this.cTree.selectedNodes.toList()); 
+		    }
+		    else
+		    {
+		         this.cEditArea.init();
+		    }
+		} }
+        { Tree.manage, btnCancel_click "树管理按钮点击事件", , , {OBJECT f_sender,OBJECT f_e} , void,	{
+		    this.pButtonLock.setButtonState(ButtonState.init);
+		} }
+        { Tree.manage, load "loadTree查询", , , {List<Row~Table> f_selectRowList"合并窗体的传参"} ,void,{
+			this.cTree.clear();
+            object.List<object.Row~Tree> tmpList;
+            if(f_selectRowList == null && this.pMergeRelationCtrl != null && this.pMergeRelationCtrl.getMergeSelectRowList().count > 0)
+            {
+                f_selectRowList = this.pMergeRelationCtrl.getMergeSelectRowList(); 
+            }
+            if(f_selectRowList == null || f_selectRowList.count == 0)
+            {
+                var a = select a.* from :identity this: a order by a.iID asc;
+                tmpList = a.rows;
+            }
+            else
+            {
+                if( f_selectRowList.count == 1 ) 
+                { 
+                    tmpList = (select a.*  from :identity this: a  where   a ~in f_selectRowList).rows; 
+                }
+            } 
+			Tree.fill(this.cTree, tmpList);
+		} }
+        { Tree.manage, actionAddBegin "树管理 动作 增加开始", , , {OBJECT f_sender,OBJECT f_e} ,void,{ 
+            this.mAction = by.enum.Action.insert;  //修改标志位
+            this.cEditArea.editAction = by.enum.Action.insert;
+            this.pButtonLock.setButtonState(ButtonState.update);
+            TreeNode~Tree tmpNode = this.cTree.newNode();   //主要作用为设定parent项的值
+            var tmpRow = new Row()~ :identity this:;
+            tmpRow.iID = byCommon.identity.general.getGuid();
+            tmpNode.tag = tmpRow; 
+            if(this.cTree.selectedNode != null)
+            {
+                tmpRow.iParent =  (this.cTree.selectedNode.tag as Row~Tree).iID; //设定parent项的值
+            } 
+            if(this.pMergeRelationCtrl != null && this.pMergeRelationCtrl.getMergeSelectRowList().count > 0)
+            {
+                tmpRow ~= this.pMergeRelationCtrl.getMergeSelectRowList()[0]; 
+            } 
+            this.cEditArea.setEditingData( tmpRow );
+            if( this.addDeleteUpdateEvent != null)  //处理合并代码
+            {
+                this.addDeleteUpdateEvent( tmpRow , curdAction.addBegin );
+            }
+		} }
+        { Tree.manage, actionAddEnd "树管理 动作 增加完成" , , ,{} ,void,	{
+			var tmpVerifyResult = this.cEditArea.verify(); 
+			var tmpVerify =  this.cEditArea.verify();
+			if(!tmpVerifyResult.isOk || !tmpVerify.isOk)
+            {
+                object.Message.alert("编辑区填写的内容不合法:"+tmpVerifyResult.info);
+                return;
+            }
+            if(!mergeDialog.verifySlaveDialog((IBy.IMaster)this))
+                return; //从dialog验证不合法
+                
+            var tmpRow = this.cEditArea.getEditingData();
+            if( (tmpRow.iParent != null && tmpRow.iParent != "" ) && tmpRow.iID == tmpRow.iParent)
+            {
+                object.Message.alert("当前节点与父节点不能一样！");
+                return;
+            } 
+            var tmpMergeAddList = new List<Row~Table>();
+            mergeDialog.getAddUpdateDeleteList( this.pSlaveDialogList, tmpMergeAddList,null,null );
+			var tmpResult = :identity this:.:server add:(tmpRow , tmpMergeAddList ) ;//insert by tmpRow ;
+			if(tmpResult.isOk)
+			{
+			    if( this.addDeleteUpdateEvent != null)  //处理合并代码
+                {
+                    this.addDeleteUpdateEvent( tmpRow , curdAction.addSave );
+                }
+				object.TreeNode~Tree tmpNode = this.cTree.newNode(); 
+				tmpNode.text = tmpRow.iName;
+				tmpNode.tag = tmpRow;
+				var tmpListNodesList = this.cTree.getAllNodes(); 
+				var tmpIsOk = false;
+				foreach (var item in tmpListNodesList)
+				{
+				    if((item.tag as Row~Tree).iID == tmpRow.iParent )  
+				    {
+				        item.add(tmpNode); 
+				        tmpIsOk = true;
+				    }
+				} 
+				if(tmpIsOk == false) 
+				{
+				    this.cTree.add(tmpNode);
+				} 
+				if(:identity this:.CURDChangeEvent != null) 
+                {
+                    var tmpList = new List<Row~Table>();
+                    tmpList.add(tmpRow);
+                    :identity this:.CURDChangeEvent(tmpList, Action.insert);
+                }
+			}
+			else
+			{
+				Message.alert("执行sql没有成功:"+tmpResult.info);
+			} 
+			if(this.cTree.selectedNode!= null)
+			{
+			    this.cTree.selectedNode.expand();
+			}
+			this.pButtonLock.setButtonState(ButtonState.init);
+		} }
+        { Tree.manage, actionModifyBegin "动作 修改开始", , , {OBJECT f_sender,EventArgs f_e} ,void,{
+			this.mAction = by.enum.Action.update;  //修改标志位
+			this.pButtonLock.setButtonState(ButtonState.update);
+			this.cEditArea.init();//初始化，或清空内容
+			if(this.cTree.selectedNode  == null)
+			{
+				object.Message.alert("请先选择一个节点后，再尝试该操作！");
+				return;
+			}
+			else
+			{
+			    this.cEditArea.setEditingData(this.cTree.selectedNode.tag as Row~Tree);
+				this.cEditArea.editAction = by.enum.Action.update; 
+				if( this.addDeleteUpdateEvent != null)  //处理合并代码
+                {
+                    this.addDeleteUpdateEvent( this.cTree.selectedNode.tag as Row~Tree , curdAction.modifBegin );
+                }
+			}
+		}}
+        { Tree.manage, actionModifyEnd "树管理 动作 修改结束", , ,{} ,void,{
+			var tmpRow = this.cEditArea.getEditingData();
+			var tmpVerifyResult = tmpRow.verify();
+			if(tmpRow == null || !tmpVerifyResult.isOk)
+            {
+                object.Message.alert("编辑区有错误:"+tmpVerifyResult.info);
+                return;
+            }
+            if(!mergeDialog.verifySlaveDialog((IBy.IMaster)this))
+                return; //从dialog验证不合法
+                
+            var tmpMergeAddList = new List<Row~Table>();
+            var tmpMergeUpdateList = new List<Row~Table>();
+            var tmpMergeDeleteList = new List<Row~Table>();
+            mergeDialog.getAddUpdateDeleteList( this.pSlaveDialogList, tmpMergeAddList,tmpMergeUpdateList,tmpMergeDeleteList );
+			var tmpResult = :identity this:.:server modify:(tmpRow , tmpMergeAddList,tmpMergeUpdateList,tmpMergeDeleteList );
+			if(tmpResult.isOk == true)
+			{
+			    if( this.addDeleteUpdateEvent != null)  //处理合并代码
+                {
+                    this.addDeleteUpdateEvent( tmpRow , curdAction.modifSave );
+                }
+			    :identity this:.refresh(this.cTree,tmpRow);//刷新树控件中的行数据
+				this.cTree.selectedNode.tag = tmpRow;
+				this.cTree.selectedNode.text = tmpRow.iName;
+				this.pButtonLock.setButtonState(ButtonState.init); 
+				if(:identity this:.CURDChangeEvent != null) 
+                {
+                    var tmpList = new List<Row~Table>();
+                    tmpList.add(tmpRow);
+                    :identity this:.CURDChangeEvent( tmpList , Action.update );
+                }
+			}
+			else
+			{
+				object.Message.alert(tmpResult.info); //甩出 出错内容
+				return;
+			}
+		}}
+        { Tree.manage, actionDelete "树管理 动作 删除", , , {OBJECT f_sender,OBJECT f_e} ,void,{
+			this.pButtonLock.setButtonState(ButtonState.Lock);
+			if(this.cTree.selectedNode == null)
+			{
+				object.Message.alert("请先选择一个节点后，再尝试该操作！");
+			}
+			else
+			{
+				if(object.Message.confirm("确认要删除当前节点，及其所属的所有子节点吗？") )
+				{
+					//找出当前节点的所有子节点出来
+					var tmpRowList = this.cTree.selectedNode.getAllNodeValues(); 
+                    var tmpMergeDeleteList = new List<Row~Table>();
+                    mergeDialog.getAddUpdateDeleteList( this.pSlaveDialogList, null , null ,tmpMergeDeleteList );
+					var tmpResult = :identity this:.:server remove:(tmpRowList.toArray() , tmpMergeDeleteList ); //执行动作
+					if(tmpResult.isOk)
+					{
+					    if( this.addDeleteUpdateEvent != null && tmpRowList.count == 1)  //处理合并代码
+                        {
+                            this.addDeleteUpdateEvent( tmpRowList[0] , curdAction.delete );
+                        }
+                        this.cTree.selectedNode.remove(); 
+                        if(:identity this:.CURDChangeEvent != null)  //处理多窗体刷新
+                        {
+                            :identity this:.CURDChangeEvent( tmpRowList , Action.delete );
+                        }
+					}
+					else
+					{
+						object.Message.alert(tmpResult.info); //甩出 出错内容
+					}
+				}
+			}
+			this.pButtonLock.setButtonState(ButtonState.init);
+		}}
+        { Tree.manage, actionSave "树管理 动作 完成后保存", , , {OBJECT f_sender,OBJECT f_e} ,void,	{
+			switch(this.mAction)
+			{
+				case by.enum.Action.update:
+					this.actionModifyEnd();
+					break;
+				case by.enum.Action.insert:
+					this.actionAddEnd();
+					break;
+			}
+		}}
+        { Tree.manage, getSelectRows, , , {  }, List<object.Row~Table>, {  
+            var tmpResultValue = new List<object.Row~Table>();
+            if(this.cEditArea.editAction == Action.insert) 
+            {
+                tmpResultValue.add(this.cEditArea.getEditingData());
+            }
+            else if( this.cTree.selectedNode != null && this.cTree.selectedNode.tag != null)
+            {
+                tmpResultValue.add((Row~Tree)this.cTree.selectedNode.tag);
+            }
+            return tmpResultValue; 
+        } } 
+
+        { bridge.manage, manage, , {  }, {  }, , {
+            this.cBtnDelete.click += actionDelete; //删除
+            if(object.Manager.getMergeDialog(this) != null ) 
+            { 
+                this.pMergeRelationCtrl = new mergeDialog(this , :identity this:  ).getMergeRelationCtrl(:identity this:);
+                if( this.pMergeRelationCtrl != null) 
+                { 
+                    this.pMergeRelationCtrl.selectChangeEvent +=(List<Row~Table> f_selectList   )
+                    {
+                        this.load( f_selectList );
+                    };
+                }
+            }
+            this.cBtnModif.click += actionModifBegin; //增加
+            var tmpGrid = this.getCurrentGrid();
+            tmpGrid.visible = true; 
+            var tmpMouseButton =  this.pMergeRelationCtrl.pMergeCtr.:from: == :identity this:.iLeft.host()  ? MouseButton.right : MouseButton.left;
+            foreach (var item in tmpGrid.gridColumns)
+            {
+                if(item.field.refTable == null)  
+                    continue;
+                    
+                if(tmpMouseButton == MouseButton.left) 
+                { 
+                    if(item.field.refTable.name == :identity this:.iRight.host().:to:.name) 
+                        item.visible = false;
+                }
+                else
+                {
+                    if(item.field.refTable.name == :identity this:.iLeft.host().:to:.name) 
+                        item.visible = false;
+                }
+            }
+        } }
+        { bridge.manage, getCurrentGrid"获得当前有效的网格，确定是left grid || right grid", {  }, {  }, {  }, Grid~bridge , {
+            if(this.pMergeRelationCtrl.pMergeCtr.:from: == :identity this:.iLeft.host())
+                return this.cGridRight;
+            else
+                return this.cGridLeft;
+        } }
+        { bridge.manage, load "bridge left 查询", , , {  List<Row~Table> f_selectRowList"合并窗体的传参" } ,void,{ 
+            var tmpGrid = this.getCurrentGrid();
+            tmpGrid.clear();
+            if(f_selectRowList != null &&  f_selectRowList.count > 0 ) //说明有值，bridge身份不能独立展示，只能与其他相关表联合展示
+            {
+                var tmpMouseButton =  this.pMergeRelationCtrl.pMergeCtr.:from: == :identity this:.iLeft.host()  ? MouseButton.right : MouseButton.left;
+                List<Row~bridge> tmpBridgeList = :identity this:.load(f_selectRowList ,  tmpMouseButton );
+                tmpGrid.addRange(tmpBridgeList);
+            }
+        } }
+        { bridge.manage, actionModifBegin "增加开始", , , {OBJECT f_sender,OBJECT f_e} ,void,{ 
+            if(pMergeRelationCtrl== null || this.pMergeRelationCtrl.getMergeSelectRowList().count == 0)  
+            {
+                Message.alert("没有长到对应的表级关系信息，或者通过关系没有找到对应的popup会话窗体信息！");
+                return;
+            }
+            Table tmpPopupTable = null;
+            MouseButton f_leftRight =  MouseButton.right;
+            if( this.pMergeRelationCtrl.pMergeCtr.:from: == :identity this:.iLeft.host() ) 
+                tmpPopupTable  = :identity this:.iRight.host();
+            else 
+            { 
+                tmpPopupTable  = :identity this:.iLeft.host();
+                f_leftRight = MouseButton.left;
+            }
+            var tmpMergeIBy= tmpPopupTable as IBy; 
+            if(tmpMergeIBy != null) 
+            {
+                var tmpSelectList = new List<Row~Table>(); 
+                var tmpGrid = this.getCurrentGrid();
+                var tmpSourceList = tmpGrid.rows.toList();
+                tmpSelectList.addRange(tmpSourceList);
+                var tmpPopup =  tmpMergeIBy.getInstanceCURDPopup( tmpSelectList ,true); 
+                tmpPopup.showDialog();
+                var tmpBridgeList = new List<Row~bridge>(); 
+                var tmpDeleteList = byCommon.identity.relatedTable.isNotExists( tmpSourceList , tmpSelectList );  //根据关系 找出原来就存在的行
+                var tmpAddList = byCommon.identity.relatedTable.isNotExists( tmpSelectList , tmpSourceList ); //根据关系 找出新增的行出来 
+                foreach (var item in tmpDeleteList) //从grid 中删除没有选择的
+                {
+                    tmpGrid.removeChild( (Row~bridge)item );
+                }
+                var tmpExeList = new List<Row~bridge>();
+                var tmpMergeRow = this.pMergeRelationCtrl.getMergeSelectRowList();
+                foreach (var item in tmpAddList) //把新选择的再加入到grid网格中去
+                {
+                    var tmpRow = tmpGrid.newRow();
+                    tmpRow.iID = byCommon.identity.general.getGuid();
+                    tmpRow ~= item; 
+                    tmpRow ~= tmpMergeRow[0];
+                    tmpGrid.add(tmpRow); 
+                    tmpExeList.add( tmpRow );
+                } 
+                if(tmpDeleteList.count == 0 && tmpExeList.count == 0) 
+                    return;
+                    
+                tran
+                {
+                    delete by tmpDeleteList;
+                    insert by tmpExeList;
+                }
+                error (string errorInfo)
+                {
+                    Message.alert(errorInfo);
+                    return;
+                }
+            }
+		} } 
+        { bridge.manage, actionDelete "删除", , , {OBJECT f_sender,OBJECT f_e} ,void,{
+            var tmpGrid = this.getCurrentGrid();
+            if( tmpGrid.selectedRows.count == 0)
+            {
+                Message.alert("请选择一行，再尝试该操作！");
+            }
+            else
+            {
+                if(Message.confirm("确认要删除？") )
+                {
+                    var tmpList = new List<Row~bridge>();// this.mGrid.selectedGridRows.toList(); 
+                    foreach ( var item in tmpGrid.rows )
+                    {
+                        tmpList.add(item);
+                    } 
+                    tran
+                    {
+                        delete by tmpList;
+                    }
+                    error (string message )
+                    {
+                        Message.alert( message );
+                        return;
+                    } 
+                    foreach ( var item in tmpList )
+                    {
+                        tmpGrid.removeChild(item);
+                    }
+                }
+            }
+		} }
+        { extend.slave, slave, , , {} ,   ,{ 
+            if(object.Manager.getMergeDialog(this) != null ) 
+            { 
+                this.pMergeRelationCtrl = new mergeDialog(this , :identity this: ).getMergeRelationCtrl(:identity this:);
+                if(pMergeRelationCtrl != null) 
+                { 
+                    this.pMergeRelationCtrl.selectChangeEvent += (List<Row~Table> f_selectList  )
+                    {
+                        this.load( f_selectList != null && f_selectList.count == 1?f_selectList[0].iID.toString():null );
+                    };
+                }
+            }
+            else
+            {
+                this.cEditArea.init();
+            }
+            var tmpMaster = object.Manager.getMergeDialog(this) ;
+            if(tmpMaster == null) 
+            {
+                Message.alert("扩展表身份只能与其对应的主表配合展表，不支持独立会话窗体进行操作！"); 
+                return;
+            }
+            var tmpMenuItem = new MenuItem(); 
+            this.cContextMenu.add(tmpMenuItem);
+            tmpMenuItem.text="新建"; 
+            //tmpMenuItem.image = Image.fromResource("create.png"); 
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                var tmpRow = new Row()~:identity this:; 
+                tmpRow.iID =  byCommon.identity.general.getGuid(); 
+                if(this.pMergeRelationCtrl != null && this.pMergeRelationCtrl.getMergeSelectRowList().count > 0)
+                {
+                    tmpRow ~= this.pMergeRelationCtrl.getMergeSelectRowList()[0]; 
+                }
+                this.cEditArea.editAction = enum.Action.insert;
+                this.cEditArea.setEditingData(tmpRow); 
+                this.cEditArea.isEnabled = true; 
+            };
+            tmpMenuItem = new MenuItem(); 
+            this.cContextMenu.add(tmpMenuItem);
+            tmpMenuItem.text="修改"; 
+            tmpMenuItem.image =  Ku.getKu(nameof (byBase)).getResource("modif.png").toImage();
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                this.cEditArea.isEnabled = true;
+                this.cEditArea.editAction = enum.Action.update;
+            };
+            tmpMenuItem = new MenuItem(); 
+            this.cContextMenu.add(tmpMenuItem);
+            tmpMenuItem.text="保存"; 
+            tmpMenuItem.image =  Ku.getKu(nameof (byBase)).getResource("save.png").toImage();//Image.fromResource("save.png"); 
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                var tmpVerify = this.cEditArea.verify();
+                if(!tmpVerify.isOk) 
+                {
+                    Message.alert(tmpVerify.info);
+                    return;
+                } 
+                var  tmpVerifyResult= this.cEditArea.verify();
+                if(!tmpVerifyResult.isOk)
+                {
+                    Message.alert(tmpVerifyResult.info);
+                    return;
+                }
+                var tmpRow = this.cEditArea.getEditingData();
+                if(this.cEditArea.editAction == Action.insert || this.cEditArea.editAction == Action.update) 
+                {
+                    int tmpValue = 0;
+                    string tmpMess ="新建";
+                    if(this.cEditArea.editAction == Action.insert) 
+                        tmpValue = insert by tmpRow;  
+                        //tmpValue = :identity this:.addUpdateDelete(tmpRow, Action.insert);
+                    else
+                    {
+                        tmpValue = update by tmpRow; 
+                        //tmpValue = :identity this:.addUpdateDelete(tmpRow, Action.update);
+                        tmpMess = "修改";
+                    } 
+                    if(tmpValue == 1) 
+                    {
+                        Message.alert(tmpMess+"成功！");
+                    } 
+                    else
+                    {
+                        Message.alert(tmpMess+"失败！");
+                        return;
+                    }
+                }
+            };
+            tmpMenuItem = new MenuItem(); 
+            this.cContextMenu.add(tmpMenuItem);
+            tmpMenuItem.text="删除"; 
+            tmpMenuItem.image = Ku.getKu(nameof (byBase)).getResource("delete.png").toImage() ;// Image.fromResource("delete.png"); 
+            tmpMenuItem.click +=(OBJECT sender, EventArgs args)
+            {
+                var tmpRow = this.cEditArea.getEditingData();
+                if(tmpRow != null)
+                {
+                    delete by tmpRow;
+                }
+                this.cEditArea.init();
+            };
+            relatedEditArea.editAreaReferenceTran(this.cEditArea); 
+            this.cEditArea.contextMenu = this.cContextMenu;
+		} } 
+        { extend.slave, load "装入数据", {  }, {  }, { string f_id"编号"  }, void, {
+            this.cEditArea.init();
+            var tmpRow = :identity this:.load(f_id);
+            if(tmpRow != null) 
+            {
+                this.cEditArea.editAction = Action.select;
+                this.cEditArea.setEditingData( tmpRow );
+            }
+        } }
+        { detail.manage, manage, , {  }, {  }, , {
+            if(object.Manager.getMergeDialog(this) != null ) 
+            { 
+                this.pMergeRelationCtrl = new mergeDialog(this, :identity this: ).getMergeRelationCtrl(this.cGrid);
+                if(pMergeRelationCtrl != null) 
+                { 
+                    this.pMergeRelationCtrl.selectChangeEvent +=(List<Row~Table> f_selectList    )
+                    {
+                        this.load(f_selectList);
+                    }; 
+                    var tmpIMaster =  this.pMergeRelationCtrl as IBy.IMaster; 
+                    if(tmpIMaster != null) 
+                    {
+                        tmpIMaster.pSlaveDialogList.add((IBy.ISlave)this); 
+                        tmpIMaster.addDeleteUpdateEvent +=(Row~Table f_selectRow, curdAction f_curdAction)
+                        {
+                            switch(f_curdAction)
+                            {
+                                case curdAction.addBegin:
+                                    this.cGrid.clear();
+                                    this.cGrid.allowEdit = true;
+                                    this.cGrid.isEnabled = true;
+                                    break;
+                                case curdAction.modifBegin:
+                                    this.cGrid.allowEdit = true;
+                                    this.cGrid.isEnabled = true;
+                                    break;
+                                case curdAction.addSave:
+                                case curdAction.modifSave:
+                                    this.cGrid.allowEdit = false;
+                                    this.cGrid.isEnabled = false;
+                                    break;
+                                case curdAction.delete:
+                                    this.cGrid.clear();
+                                    this.cGrid.allowEdit = false;
+                                    this.cGrid.isEnabled = false;
+                                    break;
+                            }
+                        };
+                    }
+                    else
+                    {
+                        Message.alert("当前合并的主dialog 没有实现 IBy.IMaster 接口，合并后将仅支持查询，不支持update、insert、delete操作！");
+                    }
+                }
+            }
+            else
+            {
+                Message.alert("detail 为从表身份，需要与其他主身份dialog 一起联合展示，\r\n不支持独立展示，请将当前的dialog合并到其他主dialog后才能展示！");
+            }
+        } } 
+        { detail.manage , load "装入数据", {  }, {  }, {List< Row~Table> f_RowList "扩展表的原身份行"  }, void, {
+            this.cGrid.clear();
+            if(f_RowList != null && f_RowList.count == 1) 
+            { 
+                var tmpRowList = :identity this:.load( f_RowList[0] );
+                if(tmpRowList.count > 0) 
+                {
+                    this.cGrid.addRange(tmpRowList);
+                } 
+            }
+        } }
+        { detail.manage, getAddDeleteUpdate "获取增删改信息,便于与其所合并的主dialog窗体一起更新（一个事物）", { client, web }, {  }, {  }, Dictionary<Action, List<Row~Table>>, { return null; } }
+        { detail.manage, verifyAddDeleteUpdate "验证用户填入的数据是否合法，没有则不验证，合法则返回True", { client, web }, {  }, {  }, bool, { return false; } }
+    }
+}

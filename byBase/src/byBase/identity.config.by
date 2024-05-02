@@ -1,0 +1,19 @@
+﻿ku byBase
+{
+    system biao identity.config "身份配置表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string mode "模式")
+    {
+        { dic, select "查询", select }
+        { popupTable, selectPopup "弹窗查询", select }
+        { Tree, selectPopup "弹窗查询", select }
+        { Tree, select "查询", select }
+        { bridge, selectLeft "查询左主表", select }
+        { bridge, selectRight "查询右主表", select }
+        { bridge, insert "增加", insert }
+        { bridge, update "更新", update }
+        { bridge, delete "删除", delete }
+        //{ Extend, select "查询" , select }
+    }
+}

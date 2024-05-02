@@ -1,0 +1,29 @@
+﻿ku byBaseTest
+{
+    new biao identity.component "身份实例构件表" (
+    string belong "所属身份实例"
+    , string name "名称"
+    , string to "标记项")
+    {
+        { dic, iID, iD }
+        { dic, iName, name }
+        { dic, iSummary, summary }
+        { dic2, iID, iD }
+        { dic2, iName, name }
+        { dic2, iSummary, summary }
+        { dic3, iID, iD }
+        { dic3, iName, name }
+        { dic3, iSummary, summary }
+        { tree, iID, iD }
+        { tree, iParent, parent }
+        { tree, iName, name }
+        { bridge, iID, iD }
+        { bridge, iLeft, left }
+        { bridge, iRight, right }
+        { extend, iID, iD }
+        { extend, iName, name }
+        { tree2, iID, iD }
+        { tree2, iParent, parent }
+        { tree2, iName, name }
+    }
+}

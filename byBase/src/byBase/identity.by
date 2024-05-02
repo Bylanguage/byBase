@@ -1,0 +1,24 @@
+﻿ku byBase
+{
+    system biao identity "身份类型表" (
+    string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string kind "类型类别"
+    , string inheritance "继承项"
+    , string[] implementations "实现接口"
+    , string constraints "约束项")
+    {
+        { TableSafe "安全的表，包括用户合法性验证" ,  ,  , identity , Table ,  ,  }
+        { relatedEditArea, {client,web}, {  }, identity, , {  },  } 
+        { popupTable "弹窗表身份", { client, server, web }, {  }, identity, TableSafe, ,  } 
+        { dic "字典表身份" ,  ,  , identity , popupTable , {byInterface.identity.IBy} ,  }
+        { Tree "树形表", , , identity, TableSafe ,  {byInterface.identity.IBy}  , } 
+        { bridge "中间表", , ,identity, TableSafe, byInterface.identity.IBy ,  }
+        { catalog "表目录", , , identity, dic, , }
+        
+        { extend "扩展表", , , identity, TableSafe, , }
+        { detail "明细表身份", { client, server, web }, {  }, identity, TableSafe, {  },  }
+        { cloud "虚拟云标识", { client, server, web }, {  }, identity, TableSafe, {  },  }
+    }
+}

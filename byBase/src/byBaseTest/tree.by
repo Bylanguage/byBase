@@ -1,0 +1,47 @@
+﻿ku byBaseTest
+{
+    data biao tree [primaryKey(iD)] (
+    string iD "树编号tree" [by.identity.ID, notNull]
+    , string parent "父项tree" [by.identity.Reference, ref: tree.iD] 
+    , string dic1NO "分类引字典tree" [by.identity.Reference,ref:dic.iD]
+    , string tree2No "t2NOtree" [by.identity.Reference,ref: tree2.iD]
+    , string name "名称项tree" [by.identity.Name, notNull])
+    {
+        
+    }
+
+    config biao tree.source "数据源配置表" (
+    string name "名称"
+    , string mode "模式"
+    , string[] actions "动作"
+    , string fieldAccess "字段访问"
+    , string[] settings "设置")
+    {
+        { iD, user, { select, insert }, iD, { name: "iD", text: "当前项" } }
+        { parent, user, { insert, delete, update, select }, parent, { name: "parent", text: "父项" } }
+        { name, user, { insert, delete, update, select }, name, { name: "name", text: "名称项" } } 
+        { dic1NO, user, { select }, dic1NO, { name: "dic1NO", text: "分类" } } 
+        { tree2No, user, { select }, tree2No, { name: "tree2No", text: "t2NO" } }
+    }
+
+    config biao tree.flow "数据流配置表" (
+    string name "名称"
+    , string action "动作"
+    , string[] sources "数据源(source.name)")
+    {
+        { insert, insert, { iD, parent,dic1NO,tree2No, name } }
+        { update, update, { parent ,dic1NO , tree2No, name } }
+        { delete, delete, { iD } }
+        { select, select, { iD, parent ,dic1NO,tree2No, name } }
+        { popup, select, { iD, dic1NO,tree2No, name } }
+    }
+
+    config biao tree.control "控件配置表" (
+    string name "名称"
+    , string[] types "控件类型"
+    , string[] sources "数据源(source.name)")
+    {
+        { edit, { Grid, EditArea }, {iD, parent ,dic1NO,tree2No, name } }
+        { popup, { Grid, QueryArea }, { iD ,dic1NO,tree2No, name } }
+    }
+}

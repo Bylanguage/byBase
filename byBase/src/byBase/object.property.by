@@ -1,0 +1,20 @@
+﻿ku byBase
+{
+    system biao object.property "面向对象属性表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string[] modifiers "修饰符"
+    , string type "类型"
+    , OBJECT value "值")
+    {
+        { buttonLock, pCacheList"全部的列表" , {  }, { private }, List<Control>,new List<Control>()  } 
+        { buttonLock, pInquiry"查询允许enable的button列表", {  }, {  }, List<Control>,new List<Control>()  } 
+        { buttonLock, pAddUpdate"更新增加允许enable的button列表", {  }, {  }, List<Control>,new List<Control>()  } 
+        { buttonLock, pInit"初始设定允许enable的button列表", {  }, {  },  List<Control>,new List<Control>()  }
+        { mergeDialog , pMergeDialog "合并会话窗体", {  }, {  } , Dialog ,  }
+        { mergeDialog , pCtrList "控件列表", {  }, {  } , List<mergeRelationCtrl> , new List<mergeRelationCtrl>() }
+        { mergeRelationCtrl, pCurrentCtr "当前控件或身份", {  }, {  }, by.identity.Table,  }
+        { mergeRelationCtrl, pMergeCtr "相关合并控件", {  }, {  }, Control~by.identity.Table,  }
+    }
+}

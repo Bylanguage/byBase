@@ -1,0 +1,18 @@
+﻿ku byBaseTest
+{
+    system biao manager.member "窗体管理器成员表" (
+    string belong "所属类型"
+    , string name "名称"
+    , OBJECT value "值"
+    , string merge "合并项")
+    {
+        { dicManagerTest, myMember, :new identity:.dic.new manage(),  } 
+        //{ dicManagerTest, myMember2, :new identity:.dic2.new manage(), myMember } 
+        //{ dicManagerTest, myMember3, :new identity:.tree.new manage(),  }
+        //{ dicManagerTest, myMember4, :new identity:.extend.new slave(), myMember } 
+        { dicManagerTest, myMember5, :new identity:.bridge.new manage(), myMember }  
+        
+        { treeManagerTest,myMember , :new identity:.tree.new manage(),  } 
+        { treeManagerTest, myMember2, :new identity:.bridge.new manage(), myMember }  
+    }
+}

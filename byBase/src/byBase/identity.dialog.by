@@ -1,0 +1,21 @@
+﻿ku byBase
+{
+    system biao identity.dialog "身份窗体表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string kind "类型类别"
+    , string inheritance "继承项"
+    , string[] implementations "实现接口")
+    {
+        { popupTable , popup "弹窗选择多行或一行", , dialog, , } 
+        { dic , manage "字典表", , dialog, , {byInterface.identity.IBy.IMaster} }
+        { Tree , popup "弹窗选择多行或一行", , dialog , ,  } 
+        { Tree , manage "树管理", , dialog, , {byInterface.identity.IBy.IMaster} } 
+        { bridge , manage "中间表管理", , dialog , ,   }
+        { extend , slave "本项只能拼入其他dialog中，仅支持一个单行的增删改", , dialog, ,  }
+        { detail, manage, { client, web }, dialog, , { byInterface.identity.IBy.ISlave } }
+    }
+}
+
+ 

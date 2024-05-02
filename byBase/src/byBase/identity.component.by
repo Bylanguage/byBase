@@ -1,0 +1,29 @@
+﻿ku byBase
+{
+    system biao identity.component "身份构件表" (
+    string belong "所属类型"
+    , string name "名称"
+    , string[] scenes "场景"
+    , string type "类型"
+    , string[] constraints "约束")
+    {
+        { dic, iID "字典key", , ID,{specific:string,min:1,max:32} }
+        { dic, iName "名称", , Name,{specific:string, min:1,max:128} }
+        { dic, iSummary "说明", , Attribute, {max:256} }
+        { Tree , iID "当前项", , ID,{specific:string,min:1,max:32} }
+        { Tree , iParent "父项", , Reference , { ref:this.iID, specific:string,min:1,max:32} }
+        { Tree , iName "名称项", , Name, { specific:string } } 
+        { bridge, iID "编号", , ID, { specific:string,min:1,max:32 } }
+        { bridge, iLeft "左表连接", , Reference, }
+        { bridge, iRight "右表连接", , Reference, } 
+        { catalog, iID "编号", , ID, { specific:string ,min:1,max:32} }
+        { catalog, iName "表名", , Name, { specific:string,min:1,max:128 } }
+        { catalog, iBillID "字段名", , Reference, { specific:string,max:128 } }
+        { catalog, iSummary "表说明", , Attribute, { specific:string,max:255 } }
+        { extend, iID "编号,本编号要与对就的主表保持一致", , ID, { specific:string,min:1,max:32} }
+        { extend, iName "名称", , Attribute,{specific:string ,min:1,max:128} }
+        { cloud , iID "云编号", , ID, {specific:string  } }
+        { cloud , iName "名称", , ID, {specific:string  } }
+        { cloud , iUser "所属用户", , Reference, {specific:string  } }
+    }
+}
